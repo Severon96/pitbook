@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useVehicle, useVehicleSummary, useDeleteVehicle } from '../api/vehicles';
 import Card from '../components/Card';
+import BrandLogo from '../components/BrandLogo';
 import { format } from 'date-fns';
 
 export default function VehicleDetail() {
@@ -58,10 +59,15 @@ export default function VehicleDetail() {
           >
             ← Back to Vehicles
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{vehicle.name}</h1>
-          <p className="mt-1 text-gray-600">
-            {vehicle.brand} {vehicle.model} ({vehicle.year})
-          </p>
+          <div className="flex items-center gap-4 mt-2">
+            <BrandLogo brand={vehicle.brand} size="xl" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{vehicle.name}</h1>
+              <p className="mt-1 text-gray-600">
+                {vehicle.brand} {vehicle.model} ({vehicle.year})
+              </p>
+            </div>
+          </div>
         </div>
         <div className="flex gap-2">
           <Link

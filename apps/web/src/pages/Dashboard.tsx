@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useVehicles } from '../api/vehicles';
 import Card from '../components/Card';
+import BrandLogo from '../components/BrandLogo';
 
 export default function Dashboard() {
   const { data: vehicles, isLoading } = useVehicles();
@@ -79,11 +80,14 @@ export default function Dashboard() {
                 className="block p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{vehicle.name}</h3>
-                    <p className="text-sm text-gray-600">
-                      {vehicle.brand} {vehicle.model} ({vehicle.year})
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <BrandLogo brand={vehicle.brand} size="sm" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{vehicle.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        {vehicle.brand} {vehicle.model} ({vehicle.year})
+                      </p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <span
