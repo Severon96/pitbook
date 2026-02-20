@@ -9,6 +9,10 @@
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=@pitbook/api\" \"npm run dev --workspace=@pitbook/web\"",
     "build": "npm run generate --workspace=@pitbook/db && npm run build --workspaces",
+    "test": "npm run test --workspace=@pitbook/api",
+    "test:watch": "npm run test --workspace=@pitbook/api -- --watch",
+    "test:coverage": "npm run test --workspace=@pitbook/api -- --coverage",
+    "test:e2e": "npm run test --workspace=@pitbook/api -- test/",
     "db:generate": "npm run generate --workspace=@pitbook/db",
     "db:migrate": "DATABASE_URL=postgresql://pitbook:pitbook_secret@localhost:5432/pitbook npx drizzle-kit migrate",
     "db:push": "npm run push --workspace=@pitbook/db",

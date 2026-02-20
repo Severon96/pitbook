@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DrizzleService } from '../drizzle/drizzle.service';
 import { eq, and, isNotNull } from 'drizzle-orm';
-import { vehicles, fuelLogs, costEntries } from '@pitbook/db/schema';
+import { vehicles, fuelLogs, costEntries } from '@pitbook/db';
 import axios from 'axios';
 
 const SPRITMONITOR_API = 'https://api.spritmonitor.de/v1';

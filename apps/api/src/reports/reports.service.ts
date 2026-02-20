@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from '../drizzle/drizzle.service';
 import { eq, and, gte, lte } from 'drizzle-orm';
-import { vehicles, costEntries, seasons } from '@pitbook/db/schema';
+import { vehicles, costEntries, seasons } from '@pitbook/db';
 
 export interface ReportFilter {
   vehicleId: string;

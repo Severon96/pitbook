@@ -2,20 +2,9 @@
 // Pitbook – Drizzle Schema
 // ─────────────────────────────────────────
 
-import {
-  pgTable,
-  pgEnum,
-  text,
-  integer,
-  timestamp,
-  numeric,
-  boolean,
-  index,
-  uniqueIndex,
-  unique,
-} from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { createId } from '@paralleldrive/cuid2';
+import {boolean, index, integer, numeric, pgEnum, pgTable, text, timestamp, unique,} from 'drizzle-orm/pg-core';
+import {relations} from 'drizzle-orm';
+import {createId} from '@paralleldrive/cuid2';
 
 // ── Enums ─────────────────────────────────
 
@@ -251,3 +240,26 @@ export const serviceRecordsRelations = relations(serviceRecords, ({ one }) => ({
     references: [costEntries.id],
   }),
 }));
+
+// Export schema object for drizzle-orm type inference
+export const schema = {
+  // Enums
+  vehicleTypeEnum,
+  costCategoryEnum,
+  costSourceEnum,
+  seasonStatusEnum,
+  // Tables
+  vehicles,
+  seasons,
+  costEntries,
+  costEntryItems,
+  fuelLogs,
+  serviceRecords,
+  // Relations
+  vehiclesRelations,
+  seasonsRelations,
+  costEntriesRelations,
+  costEntryItemsRelations,
+  fuelLogsRelations,
+  serviceRecordsRelations,
+};

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from '../drizzle/drizzle.service';
 import { CreateCostEntryDto } from './dto/create-cost-entry.dto';
 import { eq, and } from 'drizzle-orm';
-import { costEntries, costEntryItems } from '@pitbook/db/schema';
+import { costEntries, costEntryItems } from '@pitbook/db';
 
 @Injectable()
 export class CostEntriesService {
