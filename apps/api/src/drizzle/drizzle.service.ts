@@ -2,12 +2,12 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import * as schema from '@pitbook/db/schema';
+import * as schema from '@pitbook/db';
 
 @Injectable()
 export class DrizzleService implements OnModuleInit, OnModuleDestroy {
   private client: postgres.Sql;
-  public db: ReturnType<typeof drizzle<typeof schema>>;
+  public db: any; // Use any to avoid complex type inference issues with drizzle-orm in monorepo
 
   constructor(private config: ConfigService) {}
 

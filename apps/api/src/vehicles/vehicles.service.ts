@@ -3,7 +3,7 @@ import { DrizzleService } from '../drizzle/drizzle.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { eq, sql, sum, count } from 'drizzle-orm';
-import { vehicles, costEntries, fuelLogs } from '@pitbook/db/schema';
+import { vehicles, costEntries, fuelLogs } from '@pitbook/db';
 
 @Injectable()
 export class VehiclesService {
