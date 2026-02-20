@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { SpritmonitorService } from './spritmonitor.service';
-import { DrizzleService } from '../drizzle/drizzle.service';
+import {Test, TestingModule} from '@nestjs/testing';
+import {SpritmonitorService} from './spritmonitor.service';
+import {DrizzleService} from '../drizzle/drizzle.service';
 import axios from 'axios';
 
 jest.mock('axios');
@@ -146,7 +146,7 @@ describe('SpritmonitorService', () => {
 
       mockedAxios.get.mockResolvedValue(mockFuelLogsResponse);
 
-      const mockTransaction = jest.fn(async (callback) => {
+      mockDb.transaction = jest.fn(async (callback) => {
         const tx = {
           insert: jest.fn().mockReturnValue({
             values: jest.fn().mockReturnValue({
@@ -155,10 +155,8 @@ describe('SpritmonitorService', () => {
           }),
         };
         await callback(tx);
-        return { synced: 1, skipped: 0 };
+        return {synced: 1, skipped: 0};
       });
-
-      mockDb.transaction = mockTransaction;
       mockDb.update.mockReturnValue({
         set: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue(undefined),

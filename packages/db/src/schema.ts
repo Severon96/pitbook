@@ -2,20 +2,9 @@
 // Pitbook – Drizzle Schema
 // ─────────────────────────────────────────
 
-import {
-  pgTable,
-  pgEnum,
-  text,
-  integer,
-  timestamp,
-  numeric,
-  boolean,
-  index,
-  uniqueIndex,
-  unique,
-} from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { createId } from '@paralleldrive/cuid2';
+import {boolean, index, integer, numeric, pgEnum, pgTable, text, timestamp, unique,} from 'drizzle-orm/pg-core';
+import {relations} from 'drizzle-orm';
+import {createId} from '@paralleldrive/cuid2';
 
 // ── Enums ─────────────────────────────────
 

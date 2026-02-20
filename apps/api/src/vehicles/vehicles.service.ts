@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { DrizzleService } from '../drizzle/drizzle.service';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
-import { eq, sql, sum, count } from 'drizzle-orm';
-import { vehicles, costEntries, fuelLogs } from '@pitbook/db';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {DrizzleService} from '../drizzle/drizzle.service';
+import {CreateVehicleDto} from './dto/create-vehicle.dto';
+import {UpdateVehicleDto} from './dto/update-vehicle.dto';
+import {count, eq, sum} from 'drizzle-orm';
+import {costEntries, fuelLogs, vehicles} from '@pitbook/db';
 
 @Injectable()
 export class VehiclesService {

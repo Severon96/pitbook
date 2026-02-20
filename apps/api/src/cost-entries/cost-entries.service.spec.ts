@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
-import { CostEntriesService } from './cost-entries.service';
-import { DrizzleService } from '../drizzle/drizzle.service';
-import { CreateCostEntryDto } from './dto/create-cost-entry.dto';
+import {Test, TestingModule} from '@nestjs/testing';
+import {NotFoundException} from '@nestjs/common';
+import {CostEntriesService} from './cost-entries.service';
+import {DrizzleService} from '../drizzle/drizzle.service';
+import {CreateCostEntryDto} from './dto/create-cost-entry.dto';
 
 describe('CostEntriesService', () => {
   let service: CostEntriesService;
@@ -117,18 +117,16 @@ describe('CostEntriesService', () => {
         totalAmount: 50.00,
       };
 
-      const mockTransaction = jest.fn((callback) => {
+      mockDb.transaction = jest.fn((callback) => {
         const tx = {
           insert: jest.fn().mockReturnValue({
             values: jest.fn().mockReturnValue({
-              returning: jest.fn().mockResolvedValue([{ ...mockCostEntry, items: [] }]),
+              returning: jest.fn().mockResolvedValue([{...mockCostEntry, items: []}]),
             }),
           }),
         };
         return callback(tx);
       });
-
-      mockDb.transaction = mockTransaction;
 
       const result = await service.create(createDto);
 
@@ -149,20 +147,18 @@ describe('CostEntriesService', () => {
         ],
       };
 
-      const mockTransaction = jest.fn((callback) => {
+      mockDb.transaction = jest.fn((callback) => {
         const tx = {
           insert: jest.fn().mockReturnValue({
             values: jest.fn().mockReturnValue({
               returning: jest.fn().mockResolvedValue([
-                { ...mockCostEntry, totalAmount: '55.00' },
+                {...mockCostEntry, totalAmount: '55.00'},
               ]),
             }),
           }),
         };
         return callback(tx);
       });
-
-      mockDb.transaction = mockTransaction;
 
       const result = await service.create(createDto);
 
@@ -181,20 +177,18 @@ describe('CostEntriesService', () => {
         ],
       };
 
-      const mockTransaction = jest.fn((callback) => {
+      mockDb.transaction = jest.fn((callback) => {
         const tx = {
           insert: jest.fn().mockReturnValue({
             values: jest.fn().mockReturnValue({
               returning: jest.fn().mockResolvedValue([
-                { ...mockCostEntry, totalAmount: '400.00' },
+                {...mockCostEntry, totalAmount: '400.00'},
               ]),
             }),
           }),
         };
         return callback(tx);
       });
-
-      mockDb.transaction = mockTransaction;
 
       const result = await service.create(createDto);
 
