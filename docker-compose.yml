@@ -1,0 +1,74 @@
+services:
+  # ─────────────────────────────────────────
+  # PostgreSQL Database
+  # ─────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: pitbook_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pitbook}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pitbook_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-pitbook}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pitbook}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # NestJS Backend API
+  # ─────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: ${NODE_ENV:-development}
+    container_name: pitbook_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pitbook}:${POSTGRES_PASSWORD:-pitbook_secret}@postgres:5432/${POSTGRES_DB:-pitbook}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      # Dev: live reload via bind mount
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/api/node_modules
+
+  # ─────────────────────────────────────────
+  # React Frontend
+  # ─────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: ${NODE_ENV:-development}
+    container_name: pitbook_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    ports:
+      - "3000:3000"
+    volumes:
+      # Dev: live reload via bind mount
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/web/node_modules
+
+volumes:
+  postgres_data:

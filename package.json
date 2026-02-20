@@ -1,0 +1,21 @@
+{
+  "name": "pitbook",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=@pitbook/api\" \"npm run dev --workspace=@pitbook/web\"",
+    "build": "npm run generate --workspace=@pitbook/db && npm run build --workspaces",
+    "db:generate": "npm run generate --workspace=@pitbook/db",
+    "db:migrate": "DATABASE_URL=postgresql://pitbook:pitbook_secret@localhost:5432/pitbook npx drizzle-kit migrate",
+    "db:push": "npm run push --workspace=@pitbook/db",
+    "db:studio": "npm run studio --workspace=@pitbook/db",
+    "db:seed": "DATABASE_URL=postgresql://pitbook:pitbook_secret@localhost:5432/pitbook npm run seed --workspace=@pitbook/db"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
