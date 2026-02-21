@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useVehicle, useVehicleSummary, useDeleteVehicle } from '../api/vehicles';
+import { useVehicle, useVehicleSummary, useDeleteVehicle, useUpdateVehicle } from '../api/vehicles';
 import Card from '../components/Card';
 import BrandLogo from '../components/BrandLogo';
+import BrandSelect from '../components/BrandSelect';
 import { format } from 'date-fns';
 
 export default function VehicleDetail() {
@@ -10,6 +12,48 @@ export default function VehicleDetail() {
   const { data: vehicle, isLoading } = useVehicle(id!);
   const { data: summary } = useVehicleSummary(id!);
   const deleteVehicle = useDeleteVehicle();
+  const updateVehicle = useUpdateVehicle();
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    brand: '',
+    model: '',
+    year: new Date().getFullYear(),
+    type: 'DAILY' as 'DAILY' | 'SEASONAL',
+    licensePlate: '',
+    vin: '',
+    notes: '',
+  });
+
+  // Initialize form data when vehicle loads or when opening edit form
+  useEffect(() => {
+    if (vehicle && showEditForm) {
+      setFormData({
+        name: vehicle.name,
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: vehicle.year,
+        type: vehicle.type,
+        licensePlate: vehicle.licensePlate || '',
+        vin: vehicle.vin || '',
+        notes: vehicle.notes || '',
+      });
+    }
+  }, [vehicle, showEditForm]);
+
+  const handleEdit = () => {
+    setShowEditForm(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateVehicle.mutateAsync({ id: id!, ...formData });
+      setShowEditForm(false);
+    } catch (error) {
+      console.error('Failed to update vehicle:', error);
+    }
+  };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
@@ -70,6 +114,12 @@ export default function VehicleDetail() {
           </div>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={handleEdit}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Edit
+          </button>
           <Link
             to={`/vehicles/${id}/costs`}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -85,6 +135,140 @@ export default function VehicleDetail() {
           </button>
         </div>
       </div>
+
+      {/* Edit Form */}
+      {showEditForm && (
+        <Card title="Edit Vehicle">
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., My Daily Driver"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Brand *
+                </label>
+                <BrandSelect
+                  required
+                  value={formData.brand}
+                  onChange={(brand) => setFormData({ ...formData, brand })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Model *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.model}
+                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Golf VIII"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Build Year *
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={formData.year}
+                  onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 2022"
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Type *
+                </label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'DAILY' | 'SEASONAL' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="DAILY">Daily</option>
+                  <option value="SEASONAL">Seasonal</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  License Plate
+                </label>
+                <input
+                  type="text"
+                  value={formData.licensePlate}
+                  onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., ABC-123"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  VIN
+                </label>
+                <input
+                  type="text"
+                  value={formData.vin}
+                  onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 1HGBH41JXMN109186"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Additional notes..."
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowEditForm(false)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updateVehicle.isPending}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {updateVehicle.isPending ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -133,7 +317,7 @@ export default function VehicleDetail() {
               <dd className="text-sm font-medium text-gray-900">{vehicle.model}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-600">Year</dt>
+              <dt className="text-sm text-gray-600">Build Year</dt>
               <dd className="text-sm font-medium text-gray-900">{vehicle.year}</dd>
             </div>
             {vehicle.licensePlate && (

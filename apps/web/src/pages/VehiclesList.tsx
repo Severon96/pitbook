@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useVehicles, useCreateVehicle } from '../api/vehicles';
 import Card from '../components/Card';
 import BrandLogo from '../components/BrandLogo';
-import { CAR_BRANDS } from '../config/carBrands';
+import BrandSelect from '../components/BrandSelect';
 
 export default function VehiclesList() {
   const { data: vehicles, isLoading } = useVehicles();
@@ -83,19 +83,11 @@ export default function VehiclesList() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Brand *
                 </label>
-                <select
+                <BrandSelect
                   required
                   value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select a brand</option>
-                  {CAR_BRANDS.map((brand) => (
-                    <option key={brand.name} value={brand.name}>
-                      {brand.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(brand) => setFormData({ ...formData, brand })}
+                />
               </div>
 
               <div>
@@ -114,7 +106,7 @@ export default function VehiclesList() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Year *
+                  Build Year *
                 </label>
                 <input
                   type="number"
@@ -122,6 +114,9 @@ export default function VehiclesList() {
                   value={formData.year}
                   onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 2022"
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
                 />
               </div>
 
@@ -213,7 +208,7 @@ export default function VehiclesList() {
 
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Year</span>
+                    <span className="text-gray-600">Build Year</span>
                     <span className="font-medium text-gray-900">{vehicle.year}</span>
                   </div>
                   {vehicle.licensePlate && (
