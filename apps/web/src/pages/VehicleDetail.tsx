@@ -1,9 +1,12 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useVehicle, useVehicleSummary, useDeleteVehicle } from '../api/vehicles';
 import Card from '../components/Card';
 import { format } from 'date-fns';
+import { translateVehicleType, translateCostCategory, translateSeasonStatus } from '../utils/translations';
 
 export default function VehicleDetail() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: vehicle, isLoading } = useVehicle(id!);
@@ -11,7 +14,7 @@ export default function VehicleDetail() {
   const deleteVehicle = useDeleteVehicle();
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
+    if (!confirm(t('vehicle.deleteConfirm'))) {
       return;
     }
     try {
@@ -25,7 +28,7 @@ export default function VehicleDetail() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -33,9 +36,9 @@ export default function VehicleDetail() {
   if (!vehicle) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-900">Vehicle not found</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('vehicle.vehicleNotFound')}</h2>
         <Link to="/vehicles" className="mt-4 inline-block text-blue-600 hover:text-blue-700">
-          Back to Vehicles
+          {t('vehicle.backToVehicles')}
         </Link>
       </div>
     );
@@ -48,6 +51,17 @@ export default function VehicleDetail() {
     }).format(amount);
   };
 
+  const formatDate = (date: string | Date | null | undefined): string => {
+    if (!date) return '-';
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      if (isNaN(dateObj.getTime())) return '-';
+      return format(dateObj, 'MMM d, yyyy');
+    } catch {
+      return '-';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -56,7 +70,7 @@ export default function VehicleDetail() {
             to="/vehicles"
             className="text-sm text-blue-600 hover:text-blue-700 mb-2 inline-block"
           >
-            ← Back to Vehicles
+            ← {t('vehicle.backToVehicles')}
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">{vehicle.name}</h1>
           <p className="mt-1 text-gray-600">
@@ -68,14 +82,14 @@ export default function VehicleDetail() {
             to={`/vehicles/${id}/costs`}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Manage Costs
+            {t('vehicle.manageCosts')}
           </Link>
           <button
             onClick={handleDelete}
             disabled={deleteVehicle.isPending}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
           >
-            {deleteVehicle.isPending ? 'Deleting...' : 'Delete'}
+            {deleteVehicle.isPending ? t('vehicle.deleting') : t('common.delete')}
           </button>
         </div>
       </div>
@@ -83,7 +97,7 @@ export default function VehicleDetail() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <div className="space-y-2">
-            <p className="text-sm text-gray-600">Total Costs</p>
+            <p className="text-sm text-gray-600">{t('cost.totalCosts')}</p>
             <p className="text-2xl font-bold text-gray-900">
               {summary ? formatCurrency(summary.totalAmount) : '€0.00'}
             </p>
@@ -92,7 +106,7 @@ export default function VehicleDetail() {
 
         <Card>
           <div className="space-y-2">
-            <p className="text-sm text-gray-600">Cost Entries</p>
+            <p className="text-sm text-gray-600">{t('vehicle.costEntries')}</p>
             <p className="text-2xl font-bold text-gray-900">
               {summary?.entryCount || 0}
             </p>
@@ -101,7 +115,7 @@ export default function VehicleDetail() {
 
         <Card>
           <div className="space-y-2">
-            <p className="text-sm text-gray-600">Vehicle Type</p>
+            <p className="text-sm text-gray-600">{t('vehicle.type')}</p>
             <span
               className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
                 vehicle.type === 'DAILY'
@@ -109,62 +123,62 @@ export default function VehicleDetail() {
                   : 'bg-purple-100 text-purple-800'
               }`}
             >
-              {vehicle.type}
+              {translateVehicleType(vehicle.type, t)}
             </span>
           </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Vehicle Information">
+        <Card title={t('vehicle.vehicleInformation')}>
           <dl className="space-y-3">
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-600">Brand</dt>
+              <dt className="text-sm text-gray-600">{t('vehicle.brand')}</dt>
               <dd className="text-sm font-medium text-gray-900">{vehicle.brand}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-600">Model</dt>
+              <dt className="text-sm text-gray-600">{t('vehicle.model')}</dt>
               <dd className="text-sm font-medium text-gray-900">{vehicle.model}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-600">Year</dt>
+              <dt className="text-sm text-gray-600">{t('vehicle.buildYear')}</dt>
               <dd className="text-sm font-medium text-gray-900">{vehicle.year}</dd>
             </div>
             {vehicle.licensePlate && (
               <div className="flex justify-between">
-                <dt className="text-sm text-gray-600">License Plate</dt>
+                <dt className="text-sm text-gray-600">{t('vehicle.licensePlate')}</dt>
                 <dd className="text-sm font-medium text-gray-900">{vehicle.licensePlate}</dd>
               </div>
             )}
             {vehicle.vin && (
               <div className="flex justify-between">
-                <dt className="text-sm text-gray-600">VIN</dt>
+                <dt className="text-sm text-gray-600">{t('vehicle.vin')}</dt>
                 <dd className="text-sm font-medium text-gray-900">{vehicle.vin}</dd>
               </div>
             )}
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-600">Created</dt>
+              <dt className="text-sm text-gray-600">{t('vehicle.created')}</dt>
               <dd className="text-sm font-medium text-gray-900">
-                {format(new Date(vehicle.createdAt), 'MMM d, yyyy')}
+                {formatDate(vehicle.createdAt)}
               </dd>
             </div>
           </dl>
           {vehicle.notes && (
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Notes</p>
+              <p className="text-sm text-gray-600 mb-1">{t('vehicle.notes')}</p>
               <p className="text-sm text-gray-900">{vehicle.notes}</p>
             </div>
           )}
         </Card>
 
-        {summary && summary.byCategory.length > 0 && (
-          <Card title="Costs by Category">
+        {summary && summary.byCategory && summary.byCategory.length > 0 && (
+          <Card title={t('cost.costsByCategory')}>
             <div className="space-y-3">
               {summary.byCategory.map((category) => (
                 <div key={category.category} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                    <span className="text-sm text-gray-900">{category.category}</span>
+                    <span className="text-sm text-gray-900">{translateCostCategory(category.category, t)}</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">
                     {formatCurrency(category.amount)}
@@ -176,7 +190,7 @@ export default function VehicleDetail() {
         )}
 
         {vehicle.type === 'SEASONAL' && vehicle.seasons && vehicle.seasons.length > 0 && (
-          <Card title="Seasons">
+          <Card title={t('season.seasons')}>
             <div className="space-y-3">
               {vehicle.seasons.map((season) => (
                 <div key={season.id} className="p-3 rounded-lg border border-gray-200">
@@ -189,12 +203,12 @@ export default function VehicleDetail() {
                           : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {season.status}
+                      {translateSeasonStatus(season.status, t)}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600">
-                    {format(new Date(season.startDate), 'MMM d, yyyy')}
-                    {season.endDate && ` - ${format(new Date(season.endDate), 'MMM d, yyyy')}`}
+                    {formatDate(season.startDate)}
+                    {season.endDate && ` - ${formatDate(season.endDate)}`}
                   </p>
                 </div>
               ))}

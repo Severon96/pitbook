@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useVehicles } from '../api/vehicles';
 import Card from '../components/Card';
+import { translateVehicleType } from '../utils/translations';
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { data: vehicles, isLoading } = useVehicles();
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -21,9 +24,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
         <p className="mt-2 text-gray-600">
-          Track your vehicle costs and maintenance
+          {t('dashboard.subtitle')}
         </p>
       </div>
 
@@ -31,7 +34,7 @@ export default function Dashboard() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Vehicles</p>
+              <p className="text-sm font-medium text-gray-600">{t('vehicle.totalVehicles')}</p>
               <p className="mt-2 text-3xl font-bold text-gray-900">{totalVehicles}</p>
             </div>
             <div className="text-4xl">🚗</div>
@@ -41,7 +44,7 @@ export default function Dashboard() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Daily Vehicles</p>
+              <p className="text-sm font-medium text-gray-600">{t('vehicle.dailyVehicles')}</p>
               <p className="mt-2 text-3xl font-bold text-gray-900">{dailyVehicles}</p>
             </div>
             <div className="text-4xl">🚙</div>
@@ -51,7 +54,7 @@ export default function Dashboard() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Seasonal Vehicles</p>
+              <p className="text-sm font-medium text-gray-600">{t('vehicle.seasonalVehicles')}</p>
               <p className="mt-2 text-3xl font-bold text-gray-900">{seasonalVehicles}</p>
             </div>
             <div className="text-4xl">🏎️</div>
@@ -61,7 +64,7 @@ export default function Dashboard() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Cost Entries</p>
+              <p className="text-sm font-medium text-gray-600">{t('cost.totalCostEntries')}</p>
               <p className="mt-2 text-3xl font-bold text-gray-900">{totalCosts}</p>
             </div>
             <div className="text-4xl">💰</div>
@@ -69,7 +72,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <Card title="Recent Vehicles">
+      <Card title={t('vehicle.recentVehicles')}>
         {vehicles && vehicles.length > 0 ? (
           <div className="space-y-4">
             {vehicles.slice(0, 5).map((vehicle) => (
@@ -93,10 +96,10 @@ export default function Dashboard() {
                           : 'bg-purple-100 text-purple-800'
                       }`}
                     >
-                      {vehicle.type}
+                      {translateVehicleType(vehicle.type, t)}
                     </span>
                     <p className="mt-1 text-sm text-gray-600">
-                      {vehicle._count?.costEntries || 0} cost entries
+                      {vehicle._count?.costEntries || 0} {t('vehicle.costEntries').toLowerCase()}
                     </p>
                   </div>
                 </div>
@@ -105,12 +108,12 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <p>No vehicles yet</p>
+            <p>{t('vehicle.noVehiclesYet')}</p>
             <Link
               to="/vehicles"
               className="mt-2 inline-block text-blue-600 hover:text-blue-700"
             >
-              Add your first vehicle
+              {t('vehicle.addFirstVehicle')}
             </Link>
           </div>
         )}
