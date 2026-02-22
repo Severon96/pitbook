@@ -1,9 +1,10 @@
 import {ConflictException, Injectable, UnauthorizedException,} from '@nestjs/common';
 import {JwtService} from '@nestjs/jwt';
 import {DrizzleService} from '../drizzle/drizzle.service';
-import {users} from '@pitbook/db';
-import {eq} from 'drizzle-orm';
+import {users, oauthSessions} from '@pitbook/db';
+import {eq, and, gt, lt} from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import {LoginDto} from './dto/login.dto';
 import {RegisterDto} from './dto/register.dto';
 import {SetupDto} from './dto/setup.dto';
@@ -204,5 +205,121 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  /**
+   * Create OAuth session for state/nonce management
+   */
+  async createOAuthSession(redirectUri?: string) {
+    const state = crypto.randomBytes(32).toString('hex');
+    const nonce = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await this.drizzle.db.insert(oauthSessions).values({
+      state,
+      nonce,
+      redirectUri,
+      expiresAt,
+    });
+
+    return { state, nonce };
+  }
+
+  /**
+   * Validate OAuth session and return nonce
+   */
+  async validateOAuthSession(state: string) {
+    const session = await this.drizzle.db.query.oauthSessions.findFirst({
+      where: and(
+        eq(oauthSessions.state, state),
+        gt(oauthSessions.expiresAt, new Date()),
+      ),
+    });
+
+    if (!session) {
+      throw new UnauthorizedException('Invalid or expired OAuth state');
+    }
+
+    // Delete session after use (one-time use)
+    await this.drizzle.db
+      .delete(oauthSessions)
+      .where(eq(oauthSessions.state, state));
+
+    return session;
+  }
+
+  /**
+   * Validate OIDC user and auto-create if needed
+   */
+  async validateOidcUser(oidcSub: string, email: string, username?: string) {
+    // Check if user exists by OIDC sub
+    let user = await this.drizzle.db.query.users.findFirst({
+      where: eq(users.oidcSub, oidcSub),
+    });
+
+    if (!user) {
+      // Check if user exists by email (might be a local user wanting to link)
+      const existingUser = await this.drizzle.db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+
+      if (existingUser) {
+        throw new ConflictException(
+          'An account with this email already exists. Please use local login.',
+        );
+      }
+
+      // Auto-create user from OIDC profile
+      const [newUser] = await this.drizzle.db
+        .insert(users)
+        .values({
+          email,
+          username: username || email.split('@')[0],
+          oidcSub,
+          authProvider: 'OIDC',
+          passwordHash: null, // No password for OIDC users
+          role: 'USER',
+        })
+        .returning();
+
+      user = newUser;
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is inactive');
+    }
+
+    // Update last login
+    await this.drizzle.db
+      .update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, user.id));
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        authProvider: user.authProvider,
+        isActive: user.isActive,
+      },
+    };
+  }
+
+  /**
+   * Clean up expired OAuth sessions
+   */
+  async cleanupExpiredOAuthSessions() {
+    await this.drizzle.db
+      .delete(oauthSessions)
+      .where(lt(oauthSessions.expiresAt, new Date()));
   }
 }

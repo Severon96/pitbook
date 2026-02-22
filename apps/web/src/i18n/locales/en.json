@@ -127,7 +127,9 @@
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 8 characters",
     "noAccount": "Don't have an account?",
-    "alreadyHaveAccount": "Already have an account? Sign in"
+    "alreadyHaveAccount": "Already have an account? Sign in",
+    "orContinueWith": "Or continue with",
+    "ssoLogin": "Sign in with SSO"
   },
   "placeholders": {
     "vehicleName": "e.g., My Daily Driver",

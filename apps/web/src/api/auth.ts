@@ -58,4 +58,14 @@ export const authApi = {
     const { data } = await apiClient.get('/auth/me');
     return data;
   },
+
+  async getOAuthConfig(): Promise<{ enabled: boolean }> {
+    const { data } = await apiClient.get('/auth/oauth/config');
+    return data;
+  },
+
+  getOAuthLoginUrl(): string {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    return `${apiUrl}/auth/oauth/login`;
+  },
 };
