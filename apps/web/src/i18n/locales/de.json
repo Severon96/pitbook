@@ -1,0 +1,112 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "add": "Hinzufügen",
+    "back": "Zurück",
+    "search": "Suchen",
+    "required": "erforderlich",
+    "optional": "optional"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "vehicles": "Fahrzeuge"
+  },
+  "vehicle": {
+    "types": {
+      "DAILY": "Alltag",
+      "SEASONAL": "Saisonal"
+    },
+    "vehicle": "Fahrzeug",
+    "vehicles": "Fahrzeuge",
+    "name": "Name",
+    "brand": "Marke",
+    "model": "Modell",
+    "buildYear": "Baujahr",
+    "type": "Typ",
+    "licensePlate": "Kennzeichen",
+    "vin": "FIN",
+    "notes": "Notizen",
+    "created": "Erstellt",
+    "addVehicle": "Fahrzeug hinzufügen",
+    "editVehicle": "Fahrzeug bearbeiten",
+    "deleteVehicle": "Fahrzeug löschen",
+    "manageVehicle": "Fahrzeug verwalten",
+    "vehicleInformation": "Fahrzeuginformationen",
+    "totalVehicles": "Fahrzeuge gesamt",
+    "dailyVehicles": "Alltagsfahrzeuge",
+    "seasonalVehicles": "Saisonfahrzeuge",
+    "noVehiclesYet": "Noch keine Fahrzeuge",
+    "addFirstVehicle": "Füge dein erstes Fahrzeug hinzu",
+    "vehicleNotFound": "Fahrzeug nicht gefunden",
+    "backToVehicles": "Zurück zu Fahrzeuge",
+    "manageCosts": "Kosten verwalten",
+    "saveChanges": "Änderungen speichern",
+    "saving": "Speichern...",
+    "deleting": "Löschen...",
+    "creating": "Erstellen...",
+    "deleteConfirm": "Möchten Sie dieses Fahrzeug wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "selectBrand": "Marke auswählen",
+    "searchBrands": "Marken suchen...",
+    "noBrandsFound": "Keine Marken gefunden",
+    "recentVehicles": "Neueste Fahrzeuge",
+    "costEntries": "Kosteneinträge",
+    "manageFleet": "Verwalte deine Fahrzeugflotte"
+  },
+  "cost": {
+    "categories": {
+      "FUEL": "Kraftstoff",
+      "SERVICE": "Wartung",
+      "REPAIR": "Reparatur",
+      "INSURANCE": "Versicherung",
+      "TAX": "Steuer",
+      "PARTS": "Ersatzteile",
+      "OTHER": "Sonstiges"
+    },
+    "totalCosts": "Gesamtkosten",
+    "totalCostEntries": "Kosteneinträge gesamt",
+    "costsByCategory": "Kosten nach Kategorie",
+    "entries": "Einträge",
+    "addCostEntry": "Kosteneintrag hinzufügen",
+    "addEntry": "Eintrag hinzufügen",
+    "costHistory": "Kostenverlauf",
+    "noCostEntriesYet": "Noch keine Kosteneinträge",
+    "addFirstCostEntry": "Füge deinen ersten Kosteneintrag hinzu, um Ausgaben zu verfolgen",
+    "backToVehicle": "Zurück zum Fahrzeug",
+    "costEntry": "Kosteneintrag",
+    "category": "Kategorie",
+    "date": "Datum",
+    "title": "Titel",
+    "amount": "Betrag",
+    "source": "Quelle",
+    "creating": "Erstellen...",
+    "deleteCostEntryConfirm": "Möchten Sie diesen Kosteneintrag wirklich löschen?"
+  },
+  "season": {
+    "seasons": "Saisons",
+    "status": {
+      "ACTIVE": "Aktiv",
+      "CLOSED": "Geschlossen"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Verfolge deine Fahrzeugkosten und Wartung"
+  },
+  "placeholders": {
+    "vehicleName": "z.B. Mein Alltagsauto",
+    "brandName": "z.B. Volkswagen",
+    "modelName": "z.B. Golf VIII",
+    "buildYear": "z.B. 2022",
+    "licensePlate": "z.B. ABC-123",
+    "vin": "z.B. 1HGBH41JXMN109186",
+    "notes": "Zusätzliche Notizen...",
+    "costTitle": "z.B. Ölwechsel, Tanken",
+    "amount": "0,00",
+    "additionalDetails": "Weitere Details..."
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "add": "Add",
+    "back": "Back",
+    "search": "Search",
+    "required": "required",
+    "optional": "optional"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "vehicles": "Vehicles"
+  },
+  "vehicle": {
+    "types": {
+      "DAILY": "Daily",
+      "SEASONAL": "Seasonal"
+    },
+    "vehicle": "Vehicle",
+    "vehicles": "Vehicles",
+    "name": "Name",
+    "brand": "Brand",
+    "model": "Model",
+    "buildYear": "Build Year",
+    "type": "Type",
+    "licensePlate": "License Plate",
+    "vin": "VIN",
+    "notes": "Notes",
+    "created": "Created",
+    "addVehicle": "Add Vehicle",
+    "editVehicle": "Edit Vehicle",
+    "deleteVehicle": "Delete Vehicle",
+    "manageVehicle": "Manage Vehicle",
+    "vehicleInformation": "Vehicle Information",
+    "totalVehicles": "Total Vehicles",
+    "dailyVehicles": "Daily Vehicles",
+    "seasonalVehicles": "Seasonal Vehicles",
+    "noVehiclesYet": "No vehicles yet",
+    "addFirstVehicle": "Add your first vehicle",
+    "vehicleNotFound": "Vehicle not found",
+    "backToVehicles": "Back to Vehicles",
+    "manageCosts": "Manage Costs",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "creating": "Creating...",
+    "deleteConfirm": "Are you sure you want to delete this vehicle? This action cannot be undone.",
+    "selectBrand": "Select a brand",
+    "searchBrands": "Search brands...",
+    "noBrandsFound": "No brands found",
+    "recentVehicles": "Recent Vehicles",
+    "costEntries": "Cost Entries",
+    "manageFleet": "Manage your vehicle fleet"
+  },
+  "cost": {
+    "categories": {
+      "FUEL": "Fuel",
+      "SERVICE": "Service",
+      "REPAIR": "Repair",
+      "INSURANCE": "Insurance",
+      "TAX": "Tax",
+      "PARTS": "Parts",
+      "OTHER": "Other"
+    },
+    "totalCosts": "Total Costs",
+    "totalCostEntries": "Total Cost Entries",
+    "costsByCategory": "Costs by Category",
+    "entries": "Entries",
+    "addCostEntry": "Add Cost Entry",
+    "addEntry": "Add Entry",
+    "costHistory": "Cost History",
+    "noCostEntriesYet": "No cost entries yet",
+    "addFirstCostEntry": "Add your first cost entry to start tracking expenses",
+    "backToVehicle": "Back to Vehicle",
+    "costEntry": "Cost Entry",
+    "category": "Category",
+    "date": "Date",
+    "title": "Title",
+    "amount": "Amount",
+    "source": "Source",
+    "creating": "Creating...",
+    "deleteCostEntryConfirm": "Are you sure you want to delete this cost entry?"
+  },
+  "season": {
+    "seasons": "Seasons",
+    "status": {
+      "ACTIVE": "Active",
+      "CLOSED": "Closed"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Track your vehicle costs and maintenance"
+  },
+  "placeholders": {
+    "vehicleName": "e.g., My Daily Driver",
+    "brandName": "e.g., Volkswagen",
+    "modelName": "e.g., Golf VIII",
+    "buildYear": "e.g., 2022",
+    "licensePlate": "e.g., ABC-123",
+    "vin": "e.g., 1HGBH41JXMN109186",
+    "notes": "Additional notes...",
+    "costTitle": "e.g., Oil change, Fuel fillup",
+    "amount": "0.00",
+    "additionalDetails": "Additional details..."
+  }
+}
