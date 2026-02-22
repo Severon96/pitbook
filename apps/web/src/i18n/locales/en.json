@@ -142,5 +142,11 @@
     "costTitle": "e.g., Oil change, Fuel fillup",
     "amount": "0.00",
     "additionalDetails": "Additional details..."
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle theme"
   }
 }

@@ -142,5 +142,11 @@
     "costTitle": "z.B. Ölwechsel, Tanken",
     "amount": "0,00",
     "additionalDetails": "Weitere Details..."
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System",
+    "toggle": "Design wechseln"
   }
 }
