@@ -6,6 +6,19 @@ import App from './App';
 import './i18n/config';
 import './index.css';
 
+// Initialize theme before React renders to prevent flash
+const savedTheme = localStorage.getItem('theme') || 'system';
+let effectiveTheme: 'light' | 'dark';
+
+if (savedTheme === 'system') {
+  effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+} else {
+  effectiveTheme = savedTheme as 'light' | 'dark';
+}
+
+document.documentElement.classList.remove('light', 'dark');
+document.documentElement.classList.add(effectiveTheme);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
