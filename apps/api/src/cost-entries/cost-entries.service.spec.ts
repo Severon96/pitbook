@@ -9,8 +9,8 @@ describe('CostEntriesService', () => {
   let drizzleService: DrizzleService;
 
   const mockCostEntry = {
-    id: 'test-cost-entry-id',
-    vehicleId: 'test-vehicle-id',
+    id: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
+    vehicleId: '550e8400-e29b-41d4-a716-446655440000',
     seasonId: null,
     category: 'FUEL' as const,
     title: 'Gas fillup',
@@ -65,7 +65,7 @@ describe('CostEntriesService', () => {
       const mockEntries = [mockCostEntry];
       mockDb.query.costEntries.findMany.mockResolvedValue(mockEntries);
 
-      const result = await service.findAll('test-vehicle-id');
+      const result = await service.findAll('550e8400-e29b-41d4-a716-446655440000');
 
       expect(result).toEqual(mockEntries);
       expect(mockDb.query.costEntries.findMany).toHaveBeenCalled();
@@ -74,7 +74,7 @@ describe('CostEntriesService', () => {
     it('should filter by seasonId when provided', async () => {
       mockDb.query.costEntries.findMany.mockResolvedValue([mockCostEntry]);
 
-      const result = await service.findAll('test-vehicle-id', 'test-season-id');
+      const result = await service.findAll('550e8400-e29b-41d4-a716-446655440000', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890');
 
       expect(result).toEqual([mockCostEntry]);
       expect(mockDb.query.costEntries.findMany).toHaveBeenCalled();
@@ -83,7 +83,7 @@ describe('CostEntriesService', () => {
     it('should return empty array when no entries exist', async () => {
       mockDb.query.costEntries.findMany.mockResolvedValue([]);
 
-      const result = await service.findAll('test-vehicle-id');
+      const result = await service.findAll('550e8400-e29b-41d4-a716-446655440000');
 
       expect(result).toEqual([]);
     });
@@ -93,7 +93,7 @@ describe('CostEntriesService', () => {
     it('should return a single cost entry by id', async () => {
       mockDb.query.costEntries.findFirst.mockResolvedValue(mockCostEntry);
 
-      const result = await service.findOne('test-cost-entry-id');
+      const result = await service.findOne('7c9e6679-7425-40de-944b-e07fc1f90ae7');
 
       expect(result).toEqual(mockCostEntry);
     });
@@ -101,7 +101,7 @@ describe('CostEntriesService', () => {
     it('should throw NotFoundException when entry not found', async () => {
       mockDb.query.costEntries.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent-id')).rejects.toThrow(
+      await expect(service.findOne('123e4567-e89b-12d3-a456-426614174000')).rejects.toThrow(
         NotFoundException
       );
     });
@@ -110,7 +110,7 @@ describe('CostEntriesService', () => {
   describe('create', () => {
     it('should create a cost entry without items', async () => {
       const createDto: CreateCostEntryDto = {
-        vehicleId: 'test-vehicle-id',
+        vehicleId: '550e8400-e29b-41d4-a716-446655440000',
         category: 'FUEL' as any,
         title: 'Gas fillup',
         date: '2024-01-15',
@@ -137,7 +137,7 @@ describe('CostEntriesService', () => {
 
     it('should create a cost entry with items', async () => {
       const createDto: CreateCostEntryDto = {
-        vehicleId: 'test-vehicle-id',
+        vehicleId: '550e8400-e29b-41d4-a716-446655440000',
         category: 'SERVICE' as any,
         title: 'Oil change',
         date: '2024-01-15',
@@ -168,7 +168,7 @@ describe('CostEntriesService', () => {
 
     it('should calculate total from items when items provided', async () => {
       const createDto: CreateCostEntryDto = {
-        vehicleId: 'test-vehicle-id',
+        vehicleId: '550e8400-e29b-41d4-a716-446655440000',
         category: 'PARTS' as any,
         title: 'New tires',
         date: '2024-01-15',
@@ -205,7 +205,7 @@ describe('CostEntriesService', () => {
         }),
       });
 
-      const result = await service.remove('test-cost-entry-id');
+      const result = await service.remove('7c9e6679-7425-40de-944b-e07fc1f90ae7');
 
       expect(result).toEqual(mockCostEntry);
     });
@@ -213,7 +213,7 @@ describe('CostEntriesService', () => {
     it('should throw NotFoundException when deleting non-existent entry', async () => {
       mockDb.query.costEntries.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove('non-existent-id')).rejects.toThrow(
+      await expect(service.remove('123e4567-e89b-12d3-a456-426614174000')).rejects.toThrow(
         NotFoundException
       );
     });

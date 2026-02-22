@@ -3,14 +3,50 @@ import {DrizzleService} from '../drizzle/drizzle.service';
 import {CreateVehicleDto} from './dto/create-vehicle.dto';
 import {UpdateVehicleDto} from './dto/update-vehicle.dto';
 import {count, eq, sum} from 'drizzle-orm';
-import {costEntries, fuelLogs, vehicles} from '@pitbook/db';
+import {costEntries, fuelLogs, vehicles, vehicleShares} from '@pitbook/db';
 
 @Injectable()
 export class VehiclesService {
   constructor(private drizzle: DrizzleService) {}
 
-  async findAll() {
-    const vehiclesList = await this.drizzle.db.query.vehicles.findMany({
+  async findAll(userId: string, userRole: string) {
+    // Admins see all vehicles
+    if (userRole === 'ADMIN') {
+      const vehiclesList = await this.drizzle.db.query.vehicles.findMany({
+        with: {
+          seasons: {
+            orderBy: (seasons, { desc }) => [desc(seasons.startDate)],
+          },
+        },
+        orderBy: (vehicles, { desc }) => [desc(vehicles.createdAt)],
+      });
+
+      return Promise.all(
+        vehiclesList.map(async (v) => {
+          const [costCount] = await this.drizzle.db
+            .select({ count: count() })
+            .from(costEntries)
+            .where(eq(costEntries.vehicleId, v.id));
+
+          const [fuelCount] = await this.drizzle.db
+            .select({ count: count() })
+            .from(fuelLogs)
+            .where(eq(fuelLogs.vehicleId, v.id));
+
+          return {
+            ...v,
+            _count: {
+              costEntries: costCount.count,
+              fuelLogs: fuelCount.count,
+            },
+          };
+        })
+      );
+    }
+
+    // Regular users see only their own vehicles + shared vehicles
+    const ownedVehicles = await this.drizzle.db.query.vehicles.findMany({
+      where: eq(vehicles.userId, userId),
       with: {
         seasons: {
           orderBy: (seasons, { desc }) => [desc(seasons.startDate)],
@@ -19,9 +55,28 @@ export class VehiclesService {
       orderBy: (vehicles, { desc }) => [desc(vehicles.createdAt)],
     });
 
-    // Manual count for relations (Drizzle doesn't have _count)
+    // Get shared vehicles
+    const sharedVehiclesList = await this.drizzle.db.query.vehicleShares.findMany({
+      where: eq(vehicleShares.userId, userId),
+      with: {
+        vehicle: {
+          with: {
+            seasons: {
+              orderBy: (seasons, { desc }) => [desc(seasons.startDate)],
+            },
+          },
+        },
+      },
+    });
+
+    const allVehicles = [
+      ...ownedVehicles,
+      ...sharedVehiclesList.map(s => ({ ...s.vehicle, shareRole: s.role })),
+    ];
+
+    // Add counts
     return Promise.all(
-      vehiclesList.map(async (v) => {
+      allVehicles.map(async (v) => {
         const [costCount] = await this.drizzle.db
           .select({ count: count() })
           .from(costEntries)
@@ -60,10 +115,10 @@ export class VehiclesService {
     return vehicle;
   }
 
-  async create(dto: CreateVehicleDto) {
+  async create(dto: CreateVehicleDto, userId: string) {
     const [vehicle] = await this.drizzle.db
       .insert(vehicles)
-      .values(dto)
+      .values({ ...dto, userId })
       .returning();
     return vehicle;
   }

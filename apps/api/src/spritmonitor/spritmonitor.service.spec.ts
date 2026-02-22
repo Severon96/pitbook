@@ -11,7 +11,7 @@ describe('SpritmonitorService', () => {
   let drizzleService: DrizzleService;
 
   const mockVehicle = {
-    id: 'test-vehicle-id',
+    id: '550e8400-e29b-41d4-a716-446655440000',
     name: 'Test Vehicle',
     brand: 'Porsche',
     model: '911',
@@ -116,7 +116,7 @@ describe('SpritmonitorService', () => {
       });
 
       const result = await service.linkVehicle(
-        'test-vehicle-id',
+        '550e8400-e29b-41d4-a716-446655440000',
         '12345',
         'new-api-key'
       );
@@ -163,7 +163,7 @@ describe('SpritmonitorService', () => {
         }),
       });
 
-      const result = await service.syncVehicle('test-vehicle-id');
+      const result = await service.syncVehicle('550e8400-e29b-41d4-a716-446655440000');
 
       expect(result).toHaveProperty('synced');
       expect(result).toHaveProperty('skipped');
@@ -177,7 +177,7 @@ describe('SpritmonitorService', () => {
         spritmonitorApiKey: null,
       });
 
-      await expect(service.syncVehicle('test-vehicle-id')).rejects.toThrow(
+      await expect(service.syncVehicle('550e8400-e29b-41d4-a716-446655440000')).rejects.toThrow(
         'Vehicle not linked to Spritmonitor'
       );
     });

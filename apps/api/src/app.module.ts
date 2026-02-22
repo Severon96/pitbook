@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD } from '@nestjs/core';
 import { DrizzleModule } from './drizzle/drizzle.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { CostEntriesModule } from './cost-entries/cost-entries.module';
 import { SpritmonitorModule } from './spritmonitor/spritmonitor.module';
 import { ReportsModule } from './reports/reports.module';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -36,10 +40,21 @@ const envPath = path.join(projectRoot, '.env');
     }),
     ScheduleModule.forRoot(),
     DrizzleModule,
+    AuthModule,
     VehiclesModule,
     CostEntriesModule,
     SpritmonitorModule,
     ReportsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}

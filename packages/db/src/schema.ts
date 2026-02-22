@@ -2,9 +2,9 @@
 // Pitbook – Drizzle Schema
 // ─────────────────────────────────────────
 
-import {boolean, index, integer, numeric, pgEnum, pgTable, text, timestamp, unique,} from 'drizzle-orm/pg-core';
+import {boolean, index, integer, numeric, pgEnum, pgTable, text, timestamp, unique, uuid} from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
-import {createId} from '@paralleldrive/cuid2';
+import {randomUUID} from 'crypto';
 
 // ── Enums ─────────────────────────────────
 
@@ -20,13 +20,45 @@ export const costCategoryEnum = pgEnum('CostCategory', [
 ]);
 export const costSourceEnum = pgEnum('CostSource', ['MANUAL', 'SPRITMONITOR']);
 export const seasonStatusEnum = pgEnum('SeasonStatus', ['ACTIVE', 'CLOSED']);
+export const userRoleEnum = pgEnum('UserRole', ['ADMIN', 'USER']);
+export const authProviderEnum = pgEnum('AuthProvider', ['LOCAL', 'OIDC']);
+export const vehicleShareRoleEnum = pgEnum('VehicleShareRole', ['OWNER', 'EDITOR', 'VIEWER']);
 
 // ── Tables ────────────────────────────────
 
+export const users = pgTable(
+  'users',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
+    email: text('email').notNull().unique(),
+    username: text('username').notNull().unique(),
+    passwordHash: text('password_hash'), // NULL for OAuth users
+    role: userRoleEnum('role').notNull().default('USER'),
+    authProvider: authProviderEnum('auth_provider').notNull().default('LOCAL'),
+    oidcSub: text('oidc_sub').unique(),
+    isActive: boolean('is_active').notNull().default(true),
+    lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    emailIdx: index('users_email_idx').on(table.email),
+    oidcSubIdx: index('users_oidc_sub_idx').on(table.oidcSub),
+  })
+);
+
 export const vehicles = pgTable('vehicles', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
-    .$defaultFn(() => createId()),
+    .$defaultFn(() => randomUUID()),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   brand: text('brand').notNull(),
   model: text('model').notNull(),
@@ -52,10 +84,10 @@ export const vehicles = pgTable('vehicles', {
 });
 
 export const seasons = pgTable('seasons', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
-    .$defaultFn(() => createId()),
-  vehicleId: text('vehicle_id')
+    .$defaultFn(() => randomUUID()),
+  vehicleId: uuid('vehicle_id')
     .notNull()
     .references(() => vehicles.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
@@ -76,13 +108,13 @@ export const seasons = pgTable('seasons', {
 export const costEntries = pgTable(
   'cost_entries',
   {
-    id: text('id')
+    id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => createId()),
-    vehicleId: text('vehicle_id')
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
       .notNull()
       .references(() => vehicles.id, { onDelete: 'cascade' }),
-    seasonId: text('season_id').references(() => seasons.id, {
+    seasonId: uuid('season_id').references(() => seasons.id, {
       onDelete: 'set null',
     }),
     category: costCategoryEnum('category').notNull(),
@@ -109,10 +141,10 @@ export const costEntries = pgTable(
 );
 
 export const costEntryItems = pgTable('cost_entry_items', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
-    .$defaultFn(() => createId()),
-  costEntryId: text('cost_entry_id')
+    .$defaultFn(() => randomUUID()),
+  costEntryId: uuid('cost_entry_id')
     .notNull()
     .references(() => costEntries.id, { onDelete: 'cascade' }),
   description: text('description').notNull(),
@@ -124,10 +156,10 @@ export const costEntryItems = pgTable('cost_entry_items', {
 export const fuelLogs = pgTable(
   'fuel_logs',
   {
-    id: text('id')
+    id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => createId()),
-    vehicleId: text('vehicle_id')
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
       .notNull()
       .references(() => vehicles.id, { onDelete: 'cascade' }),
     spritmonitorId: text('spritmonitor_id'),
@@ -159,13 +191,13 @@ export const fuelLogs = pgTable(
 export const serviceRecords = pgTable(
   'service_records',
   {
-    id: text('id')
+    id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => createId()),
-    vehicleId: text('vehicle_id')
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
       .notNull()
       .references(() => vehicles.id, { onDelete: 'cascade' }),
-    costEntryId: text('cost_entry_id').references(() => costEntries.id, {
+    costEntryId: uuid('cost_entry_id').references(() => costEntries.id, {
       onDelete: 'set null',
     }),
     serviceType: text('service_type').notNull(),
@@ -186,9 +218,70 @@ export const serviceRecords = pgTable(
   })
 );
 
+export const vehicleShares = pgTable(
+  'vehicle_shares',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
+      .notNull()
+      .references(() => vehicles.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: vehicleShareRoleEnum('role').notNull(),
+    grantedById: uuid('granted_by_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    grantedAt: timestamp('granted_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    vehicleUserUnique: unique('vehicle_shares_vehicle_user_unique').on(
+      table.vehicleId,
+      table.userId
+    ),
+    vehicleIdIdx: index('vehicle_shares_vehicle_id_idx').on(table.vehicleId),
+    userIdIdx: index('vehicle_shares_user_id_idx').on(table.userId),
+  })
+);
+
+export const oauthSessions = pgTable(
+  'oauth_sessions',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
+    state: text('state').notNull().unique(),
+    nonce: text('nonce').notNull(),
+    redirectUri: text('redirect_uri'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  },
+  (table) => ({
+    stateIdx: index('oauth_sessions_state_idx').on(table.state),
+    expiresAtIdx: index('oauth_sessions_expires_at_idx').on(table.expiresAt),
+  })
+);
+
 // ── Relations ─────────────────────────────
 
-export const vehiclesRelations = relations(vehicles, ({ many }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
+  vehicles: many(vehicles),
+  vehicleShares: many(vehicleShares, { relationName: 'userShares' }),
+  grantedShares: many(vehicleShares, { relationName: 'grantedByUser' }),
+}));
+
+export const vehiclesRelations = relations(vehicles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [vehicles.userId],
+    references: [users.id],
+  }),
+  shares: many(vehicleShares),
   seasons: many(seasons),
   costEntries: many(costEntries),
   fuelLogs: many(fuelLogs),
@@ -241,6 +334,23 @@ export const serviceRecordsRelations = relations(serviceRecords, ({ one }) => ({
   }),
 }));
 
+export const vehicleSharesRelations = relations(vehicleShares, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [vehicleShares.vehicleId],
+    references: [vehicles.id],
+  }),
+  user: one(users, {
+    fields: [vehicleShares.userId],
+    references: [users.id],
+    relationName: 'userShares',
+  }),
+  grantedBy: one(users, {
+    fields: [vehicleShares.grantedById],
+    references: [users.id],
+    relationName: 'grantedByUser',
+  }),
+}));
+
 // Export schema object for drizzle-orm type inference
 export const schema = {
   // Enums
@@ -248,18 +358,26 @@ export const schema = {
   costCategoryEnum,
   costSourceEnum,
   seasonStatusEnum,
+  userRoleEnum,
+  authProviderEnum,
+  vehicleShareRoleEnum,
   // Tables
+  users,
   vehicles,
   seasons,
   costEntries,
   costEntryItems,
   fuelLogs,
   serviceRecords,
+  vehicleShares,
+  oauthSessions,
   // Relations
+  usersRelations,
   vehiclesRelations,
   seasonsRelations,
   costEntriesRelations,
   costEntryItemsRelations,
   fuelLogsRelations,
   serviceRecordsRelations,
+  vehicleSharesRelations,
 };

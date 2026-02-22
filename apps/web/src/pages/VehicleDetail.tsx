@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useVehicle, useVehicleSummary, useDeleteVehicle } from '../api/vehicles';
+import { useCostEntries } from '../api/costEntries';
+import { exportVehicleCostsCsv } from '../api/reports';
 import Card from '../components/Card';
 import { format } from 'date-fns';
 import { translateVehicleType, translateCostCategory, translateSeasonStatus } from '../utils/translations';
@@ -11,7 +14,11 @@ export default function VehicleDetail() {
   const navigate = useNavigate();
   const { data: vehicle, isLoading } = useVehicle(id!);
   const { data: summary } = useVehicleSummary(id!);
+  const { data: costEntries } = useCostEntries(id!);
   const deleteVehicle = useDeleteVehicle();
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportFilter, setExportFilter] = useState<'all' | 'year'>('all');
+  const [selectedYear, setSelectedYear] = useState<string>('');
 
   const handleDelete = async () => {
     if (!confirm(t('vehicle.deleteConfirm'))) {
@@ -24,6 +31,28 @@ export default function VehicleDetail() {
       console.error('Failed to delete vehicle:', error);
     }
   };
+
+  const handleExport = async () => {
+    try {
+      const options: any = { vehicleId: id! };
+
+      if (exportFilter === 'year' && selectedYear) {
+        options.dateFrom = `${selectedYear}-01-01`;
+        options.dateTo = `${selectedYear}-12-31`;
+      }
+
+      await exportVehicleCostsCsv(options);
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Failed to export costs:', error);
+      alert(t('cost.exportFailed') || 'Export failed');
+    }
+  };
+
+  // Get unique years from cost entries
+  const availableYears = costEntries
+    ? Array.from(new Set(costEntries.map(entry => new Date(entry.date).getFullYear()))).sort((a, b) => b - a)
+    : [];
 
   if (isLoading) {
     return (
@@ -78,6 +107,12 @@ export default function VehicleDetail() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            📥 {t('cost.exportCosts')}
+          </button>
           <Link
             to={`/vehicles/${id}/costs`}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -216,6 +251,91 @@ export default function VehicleDetail() {
           </Card>
         )}
       </div>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              {t('cost.exportCosts')}
+            </h2>
+
+            {costEntries && costEntries.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-gray-600 mb-4">{t('cost.noDataToExport')}</p>
+                <button
+                  onClick={() => setShowExportModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  {t('common.close')}
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4 mb-6">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="exportFilter"
+                      value="all"
+                      checked={exportFilter === 'all'}
+                      onChange={(e) => setExportFilter(e.target.value as any)}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-gray-900">{t('cost.exportAll')}</span>
+                  </label>
+
+                  {availableYears.length > 0 && (
+                    <div>
+                      <label className="flex items-center space-x-3 cursor-pointer mb-2">
+                        <input
+                          type="radio"
+                          name="exportFilter"
+                          value="year"
+                          checked={exportFilter === 'year'}
+                          onChange={(e) => setExportFilter(e.target.value as any)}
+                          className="w-4 h-4 text-blue-600"
+                        />
+                        <span className="text-gray-900">{t('cost.exportByYear')}</span>
+                      </label>
+                      {exportFilter === 'year' && (
+                        <select
+                          value={selectedYear}
+                          onChange={(e) => setSelectedYear(e.target.value)}
+                          className="ml-7 w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="">{t('cost.selectYear')}</option>
+                          {availableYears.map((year) => (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowExportModal(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    onClick={handleExport}
+                    disabled={exportFilter === 'year' && !selectedYear}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    📥 {t('cost.download')}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

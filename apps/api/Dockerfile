@@ -6,35 +6,34 @@
 # Base
 FROM node:20-alpine AS base
 WORKDIR /app
-RUN corepack enable && corepack prepare yarn@stable --activate
 
 # ── Development ───────────────────────────
 FROM base AS development
-COPY package.json yarn.lock .yarnrc.yml* ./
+COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/db/package.json ./packages/db/
 COPY packages/types/package.json ./packages/types/
-RUN yarn install
+RUN npm ci
 
 COPY . .
 
-# Generate Prisma client
-RUN yarn workspace @pitbook/db generate
+# Build db package
+RUN npm run build --workspace=@pitbook/db
 
 WORKDIR /app/apps/api
-CMD ["yarn", "dev"]
+CMD ["npm", "run", "dev"]
 
 # ── Build ─────────────────────────────────
 FROM base AS build
-COPY package.json yarn.lock .yarnrc.yml* ./
+COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/db/package.json ./packages/db/
 COPY packages/types/package.json ./packages/types/
-RUN yarn install --frozen-lockfile
+RUN npm ci
 
 COPY . .
-RUN yarn workspace @pitbook/db generate
-RUN yarn workspace @pitbook/api build
+RUN npm run build --workspace=@pitbook/db
+RUN npm run build --workspace=@pitbook/api
 
 # ── Production ────────────────────────────
 FROM node:20-alpine AS production

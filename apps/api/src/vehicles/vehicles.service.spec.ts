@@ -8,7 +8,8 @@ describe('VehiclesService', () => {
   let drizzleService: DrizzleService;
 
   const mockVehicle = {
-    id: 'test-vehicle-id',
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    userId: 'user-123',
     name: 'Test Vehicle',
     brand: 'Toyota',
     model: 'Camry',
@@ -30,6 +31,9 @@ describe('VehiclesService', () => {
       vehicles: {
         findMany: jest.fn(),
         findFirst: jest.fn(),
+      },
+      vehicleShares: {
+        findMany: jest.fn(),
       },
     },
     insert: jest.fn(),
@@ -64,7 +68,7 @@ describe('VehiclesService', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of vehicles with counts', async () => {
+    it('should return all vehicles for admin users', async () => {
       const mockVehicles = [mockVehicle];
       mockDb.query.vehicles.findMany.mockResolvedValue(mockVehicles);
       mockDb.select.mockReturnValue({
@@ -73,17 +77,34 @@ describe('VehiclesService', () => {
         }),
       });
 
-      const result = await service.findAll();
+      const result = await service.findAll('admin-user-id', 'ADMIN');
 
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('_count');
       expect(mockDb.query.vehicles.findMany).toHaveBeenCalled();
     });
 
+    it('should return only owned vehicles for regular users', async () => {
+      const mockVehicles = [mockVehicle];
+      mockDb.query.vehicles.findMany.mockResolvedValue(mockVehicles);
+      mockDb.query.vehicleShares.findMany.mockResolvedValue([]);
+      mockDb.select.mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([{ count: 5 }]),
+        }),
+      });
+
+      const result = await service.findAll('user-123', 'USER');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty('_count');
+    });
+
     it('should return empty array when no vehicles exist', async () => {
       mockDb.query.vehicles.findMany.mockResolvedValue([]);
+      mockDb.query.vehicleShares.findMany.mockResolvedValue([]);
 
-      const result = await service.findAll();
+      const result = await service.findAll('user-123', 'USER');
 
       expect(result).toEqual([]);
     });
@@ -93,7 +114,7 @@ describe('VehiclesService', () => {
     it('should return a single vehicle by id', async () => {
       mockDb.query.vehicles.findFirst.mockResolvedValue(mockVehicle);
 
-      const result = await service.findOne('test-vehicle-id');
+      const result = await service.findOne('550e8400-e29b-41d4-a716-446655440000');
 
       expect(result).toEqual(mockVehicle);
       expect(mockDb.query.vehicles.findFirst).toHaveBeenCalled();
@@ -102,7 +123,7 @@ describe('VehiclesService', () => {
     it('should throw NotFoundException when vehicle not found', async () => {
       mockDb.query.vehicles.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent-id')).rejects.toThrow(
+      await expect(service.findOne('123e4567-e89b-12d3-a456-426614174000')).rejects.toThrow(
         NotFoundException
       );
     });
@@ -124,7 +145,7 @@ describe('VehiclesService', () => {
         }),
       });
 
-      const result = await service.create(createDto);
+      const result = await service.create(createDto, 'user-123');
 
       expect(result).toHaveProperty('brand', 'Honda');
       expect(mockDb.insert).toHaveBeenCalled();
@@ -146,7 +167,7 @@ describe('VehiclesService', () => {
         }),
       });
 
-      const result = await service.update('test-vehicle-id', updateDto);
+      const result = await service.update('550e8400-e29b-41d4-a716-446655440000', updateDto);
 
       expect(result).toHaveProperty('name', 'Updated Vehicle');
     });
@@ -155,7 +176,7 @@ describe('VehiclesService', () => {
       mockDb.query.vehicles.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.update('non-existent-id', { name: 'Test' })
+        service.update('123e4567-e89b-12d3-a456-426614174000', { name: 'Test' })
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -169,7 +190,7 @@ describe('VehiclesService', () => {
         }),
       });
 
-      const result = await service.remove('test-vehicle-id');
+      const result = await service.remove('550e8400-e29b-41d4-a716-446655440000');
 
       expect(result).toEqual(mockVehicle);
     });
@@ -177,7 +198,7 @@ describe('VehiclesService', () => {
     it('should throw NotFoundException when deleting non-existent vehicle', async () => {
       mockDb.query.vehicles.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove('non-existent-id')).rejects.toThrow(
+      await expect(service.remove('123e4567-e89b-12d3-a456-426614174000')).rejects.toThrow(
         NotFoundException
       );
     });
@@ -210,7 +231,7 @@ describe('VehiclesService', () => {
         .mockReturnValueOnce({ from: mockFromForTotal })
         .mockReturnValueOnce({ from: mockFromForCategory });
 
-      const result = await service.getSummary('test-vehicle-id');
+      const result = await service.getSummary('550e8400-e29b-41d4-a716-446655440000');
 
       expect(result).toHaveProperty('totalAmount', 500);
       expect(result).toHaveProperty('entryCount', 10);
@@ -220,7 +241,7 @@ describe('VehiclesService', () => {
     it('should throw NotFoundException when vehicle not found', async () => {
       mockDb.query.vehicles.findFirst.mockResolvedValue(null);
 
-      await expect(service.getSummary('non-existent-id')).rejects.toThrow(
+      await expect(service.getSummary('123e4567-e89b-12d3-a456-426614174000')).rejects.toThrow(
         NotFoundException
       );
     });

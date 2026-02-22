@@ -37,7 +37,20 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       DATABASE_URL: postgresql://${POSTGRES_USER:-pitbook}:${POSTGRES_PASSWORD:-pitbook_secret}@postgres:5432/${POSTGRES_DB:-pitbook}
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       PORT: 3001
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      # OAuth/OIDC Configuration
+      OIDC_ENABLED: ${OIDC_ENABLED:-false}
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI}
+      OIDC_SCOPE: ${OIDC_SCOPE:-openid profile email}
+      # Disable Node.js certificate validation for self-signed certs (development only)
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "3001:3001"
     volumes:

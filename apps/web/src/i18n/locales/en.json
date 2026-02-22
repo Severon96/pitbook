@@ -10,7 +10,8 @@
     "back": "Back",
     "search": "Search",
     "required": "required",
-    "optional": "optional"
+    "optional": "optional",
+    "close": "Close"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -84,7 +85,16 @@
     "amount": "Amount",
     "source": "Source",
     "creating": "Creating...",
-    "deleteCostEntryConfirm": "Are you sure you want to delete this cost entry?"
+    "deleteCostEntryConfirm": "Are you sure you want to delete this cost entry?",
+    "exportCosts": "Export Costs",
+    "exportAll": "All data",
+    "exportBySeason": "By season",
+    "exportByYear": "By year",
+    "selectSeason": "Select a season...",
+    "selectYear": "Select a year...",
+    "download": "Download",
+    "noDataToExport": "No cost data available to export.",
+    "exportFailed": "Failed to export costs"
   },
   "season": {
     "seasons": "Seasons",
@@ -96,6 +106,30 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Track your vehicle costs and maintenance"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "setup": "Initial Setup",
+    "setupDescription": "Create the first admin account to get started",
+    "createAdmin": "Create Admin Account",
+    "creatingAdmin": "Creating...",
+    "loginFailed": "Invalid email or password",
+    "loggingIn": "Logging in...",
+    "registering": "Registering...",
+    "registrationFailed": "Registration failed",
+    "setupFailed": "Setup failed",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "noAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account? Sign in",
+    "orContinueWith": "Or continue with",
+    "ssoLogin": "Sign in with SSO"
   },
   "placeholders": {
     "vehicleName": "e.g., My Daily Driver",
