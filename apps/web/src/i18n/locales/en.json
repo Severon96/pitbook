@@ -10,7 +10,8 @@
     "back": "Back",
     "search": "Search",
     "required": "required",
-    "optional": "optional"
+    "optional": "optional",
+    "close": "Close"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -84,7 +85,16 @@
     "amount": "Amount",
     "source": "Source",
     "creating": "Creating...",
-    "deleteCostEntryConfirm": "Are you sure you want to delete this cost entry?"
+    "deleteCostEntryConfirm": "Are you sure you want to delete this cost entry?",
+    "exportCosts": "Export Costs",
+    "exportAll": "All data",
+    "exportBySeason": "By season",
+    "exportByYear": "By year",
+    "selectSeason": "Select a season...",
+    "selectYear": "Select a year...",
+    "download": "Download",
+    "noDataToExport": "No cost data available to export.",
+    "exportFailed": "Failed to export costs"
   },
   "season": {
     "seasons": "Seasons",
