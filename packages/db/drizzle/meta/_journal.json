@@ -8,6 +8,13 @@
       "when": 1771610222615,
       "tag": "0000_flawless_miracleman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771754752567,
+      "tag": "0001_loose_switch",
+      "breakpoints": true
     }
   ]
 }

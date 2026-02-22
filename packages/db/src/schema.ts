@@ -2,9 +2,9 @@
 // Pitbook – Drizzle Schema
 // ─────────────────────────────────────────
 
-import {boolean, index, integer, numeric, pgEnum, pgTable, text, timestamp, unique,} from 'drizzle-orm/pg-core';
+import {boolean, index, integer, numeric, pgEnum, pgTable, text, timestamp, unique, uuid} from 'drizzle-orm/pg-core';
 import {relations} from 'drizzle-orm';
-import {createId} from '@paralleldrive/cuid2';
+import {randomUUID} from 'crypto';
 
 // ── Enums ─────────────────────────────────
 
@@ -24,9 +24,9 @@ export const seasonStatusEnum = pgEnum('SeasonStatus', ['ACTIVE', 'CLOSED']);
 // ── Tables ────────────────────────────────
 
 export const vehicles = pgTable('vehicles', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
-    .$defaultFn(() => createId()),
+    .$defaultFn(() => randomUUID()),
   name: text('name').notNull(),
   brand: text('brand').notNull(),
   model: text('model').notNull(),
@@ -52,10 +52,10 @@ export const vehicles = pgTable('vehicles', {
 });
 
 export const seasons = pgTable('seasons', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
-    .$defaultFn(() => createId()),
-  vehicleId: text('vehicle_id')
+    .$defaultFn(() => randomUUID()),
+  vehicleId: uuid('vehicle_id')
     .notNull()
     .references(() => vehicles.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
@@ -76,13 +76,13 @@ export const seasons = pgTable('seasons', {
 export const costEntries = pgTable(
   'cost_entries',
   {
-    id: text('id')
+    id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => createId()),
-    vehicleId: text('vehicle_id')
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
       .notNull()
       .references(() => vehicles.id, { onDelete: 'cascade' }),
-    seasonId: text('season_id').references(() => seasons.id, {
+    seasonId: uuid('season_id').references(() => seasons.id, {
       onDelete: 'set null',
     }),
     category: costCategoryEnum('category').notNull(),
@@ -109,10 +109,10 @@ export const costEntries = pgTable(
 );
 
 export const costEntryItems = pgTable('cost_entry_items', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
-    .$defaultFn(() => createId()),
-  costEntryId: text('cost_entry_id')
+    .$defaultFn(() => randomUUID()),
+  costEntryId: uuid('cost_entry_id')
     .notNull()
     .references(() => costEntries.id, { onDelete: 'cascade' }),
   description: text('description').notNull(),
@@ -124,10 +124,10 @@ export const costEntryItems = pgTable('cost_entry_items', {
 export const fuelLogs = pgTable(
   'fuel_logs',
   {
-    id: text('id')
+    id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => createId()),
-    vehicleId: text('vehicle_id')
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
       .notNull()
       .references(() => vehicles.id, { onDelete: 'cascade' }),
     spritmonitorId: text('spritmonitor_id'),
@@ -159,13 +159,13 @@ export const fuelLogs = pgTable(
 export const serviceRecords = pgTable(
   'service_records',
   {
-    id: text('id')
+    id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => createId()),
-    vehicleId: text('vehicle_id')
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
       .notNull()
       .references(() => vehicles.id, { onDelete: 'cascade' }),
-    costEntryId: text('cost_entry_id').references(() => costEntries.id, {
+    costEntryId: uuid('cost_entry_id').references(() => costEntries.id, {
       onDelete: 'set null',
     }),
     serviceType: text('service_type').notNull(),

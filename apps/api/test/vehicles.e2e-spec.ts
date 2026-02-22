@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { VehiclesModule } from '../src/vehicles/vehicles.module';
 import { DrizzleModule } from '../src/drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
@@ -111,7 +111,7 @@ describe('VehiclesController (e2e)', () => {
 
     it('should return 404 for non-existent vehicle', () => {
       return request(app.getHttpServer())
-        .get('/vehicles/non-existent-id')
+        .get('/vehicles/123e4567-e89b-12d3-a456-426614174000')
         .expect(404);
     });
   });
@@ -144,7 +144,7 @@ describe('VehiclesController (e2e)', () => {
 
     it('should return 404 when updating non-existent vehicle', () => {
       return request(app.getHttpServer())
-        .put('/vehicles/non-existent-id')
+        .put('/vehicles/123e4567-e89b-12d3-a456-426614174000')
         .send({
           name: 'Updated Name',
         })
@@ -203,7 +203,7 @@ describe('VehiclesController (e2e)', () => {
 
     it('should return 404 when deleting non-existent vehicle', () => {
       return request(app.getHttpServer())
-        .delete('/vehicles/non-existent-id')
+        .delete('/vehicles/123e4567-e89b-12d3-a456-426614174000')
         .expect(404);
     });
   });
