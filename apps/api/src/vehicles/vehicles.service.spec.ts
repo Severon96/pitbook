@@ -9,6 +9,7 @@ describe('VehiclesService', () => {
 
   const mockVehicle = {
     id: '550e8400-e29b-41d4-a716-446655440000',
+    userId: 'user-123',
     name: 'Test Vehicle',
     brand: 'Toyota',
     model: 'Camry',
@@ -30,6 +31,9 @@ describe('VehiclesService', () => {
       vehicles: {
         findMany: jest.fn(),
         findFirst: jest.fn(),
+      },
+      vehicleShares: {
+        findMany: jest.fn(),
       },
     },
     insert: jest.fn(),
@@ -64,7 +68,7 @@ describe('VehiclesService', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of vehicles with counts', async () => {
+    it('should return all vehicles for admin users', async () => {
       const mockVehicles = [mockVehicle];
       mockDb.query.vehicles.findMany.mockResolvedValue(mockVehicles);
       mockDb.select.mockReturnValue({
@@ -73,17 +77,34 @@ describe('VehiclesService', () => {
         }),
       });
 
-      const result = await service.findAll();
+      const result = await service.findAll('admin-user-id', 'ADMIN');
 
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('_count');
       expect(mockDb.query.vehicles.findMany).toHaveBeenCalled();
     });
 
+    it('should return only owned vehicles for regular users', async () => {
+      const mockVehicles = [mockVehicle];
+      mockDb.query.vehicles.findMany.mockResolvedValue(mockVehicles);
+      mockDb.query.vehicleShares.findMany.mockResolvedValue([]);
+      mockDb.select.mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([{ count: 5 }]),
+        }),
+      });
+
+      const result = await service.findAll('user-123', 'USER');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty('_count');
+    });
+
     it('should return empty array when no vehicles exist', async () => {
       mockDb.query.vehicles.findMany.mockResolvedValue([]);
+      mockDb.query.vehicleShares.findMany.mockResolvedValue([]);
 
-      const result = await service.findAll();
+      const result = await service.findAll('user-123', 'USER');
 
       expect(result).toEqual([]);
     });
@@ -124,7 +145,7 @@ describe('VehiclesService', () => {
         }),
       });
 
-      const result = await service.create(createDto);
+      const result = await service.create(createDto, 'user-123');
 
       expect(result).toHaveProperty('brand', 'Honda');
       expect(mockDb.insert).toHaveBeenCalled();

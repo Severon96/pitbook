@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { t } = useTranslation();
+  const { user, logout } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -50,8 +52,21 @@ export default function Layout({ children }: LayoutProps) {
                 </Link>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center space-x-4">
               <LanguageSwitcher />
+              {user && (
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-gray-700">
+                    {user.username}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    {t('auth.logout')}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

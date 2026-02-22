@@ -107,6 +107,28 @@
     "title": "Dashboard",
     "subtitle": "Track your vehicle costs and maintenance"
   },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "setup": "Initial Setup",
+    "setupDescription": "Create the first admin account to get started",
+    "createAdmin": "Create Admin Account",
+    "creatingAdmin": "Creating...",
+    "loginFailed": "Invalid email or password",
+    "loggingIn": "Logging in...",
+    "registering": "Registering...",
+    "registrationFailed": "Registration failed",
+    "setupFailed": "Setup failed",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "noAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account? Sign in"
+  },
   "placeholders": {
     "vehicleName": "e.g., My Daily Driver",
     "brandName": "e.g., Volkswagen",

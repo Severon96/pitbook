@@ -15,6 +15,13 @@
       "when": 1771754752567,
       "tag": "0001_loose_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771757482432,
+      "tag": "0002_slow_hemingway",
+      "breakpoints": true
     }
   ]
 }
