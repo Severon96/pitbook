@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useVehicles, useCreateVehicle } from '../api/vehicles';
 import Card from '../components/Card';
+import { translateVehicleType } from '../utils/translations';
 
 export default function VehiclesList() {
+  const { t } = useTranslation();
   const { data: vehicles, isLoading } = useVehicles();
   const createVehicle = useCreateVehicle();
   const [showForm, setShowForm] = useState(false);
@@ -39,7 +42,7 @@ export default function VehiclesList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -48,24 +51,24 @@ export default function VehiclesList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Vehicles</h1>
-          <p className="mt-2 text-gray-600">Manage your vehicle fleet</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('vehicle.vehicles')}</h1>
+          <p className="mt-2 text-gray-600">{t('vehicle.manageFleet')}</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          {showForm ? 'Cancel' : '+ Add Vehicle'}
+          {showForm ? t('common.cancel') : `+ ${t('vehicle.addVehicle')}`}
         </button>
       </div>
 
       {showForm && (
-        <Card title="Add New Vehicle">
+        <Card title={t('vehicle.addVehicle')}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name *
+                  {t('vehicle.name')} *
                 </label>
                 <input
                   type="text"
@@ -73,13 +76,13 @@ export default function VehiclesList() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., My Daily Driver"
+                  placeholder={t('placeholders.vehicleName')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Brand *
+                  {t('vehicle.brand')} *
                 </label>
                 <input
                   type="text"
@@ -87,13 +90,13 @@ export default function VehiclesList() {
                   value={formData.brand}
                   onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Volkswagen"
+                  placeholder={t('placeholders.brandName')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Model *
+                  {t('vehicle.model')} *
                 </label>
                 <input
                   type="text"
@@ -101,13 +104,13 @@ export default function VehiclesList() {
                   value={formData.model}
                   onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Golf VIII"
+                  placeholder={t('placeholders.modelName')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Year *
+                  {t('vehicle.buildYear')} *
                 </label>
                 <input
                   type="number"
@@ -115,47 +118,50 @@ export default function VehiclesList() {
                   value={formData.year}
                   onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder={t('placeholders.buildYear')}
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Type *
+                  {t('vehicle.type')} *
                 </label>
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as 'DAILY' | 'SEASONAL' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="DAILY">Daily</option>
-                  <option value="SEASONAL">Seasonal</option>
+                  <option value="DAILY">{t('vehicle.types.DAILY')}</option>
+                  <option value="SEASONAL">{t('vehicle.types.SEASONAL')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  License Plate
+                  {t('vehicle.licensePlate')}
                 </label>
                 <input
                   type="text"
                   value={formData.licensePlate}
                   onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., ABC-123"
+                  placeholder={t('placeholders.licensePlate')}
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Notes
+                {t('vehicle.notes')}
               </label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Additional notes..."
+                placeholder={t('placeholders.notes')}
               />
             </div>
 
@@ -165,7 +171,7 @@ export default function VehiclesList() {
                 disabled={createVehicle.isPending}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
-                {createVehicle.isPending ? 'Creating...' : 'Create Vehicle'}
+                {createVehicle.isPending ? t('vehicle.creating') : t('vehicle.addVehicle')}
               </button>
             </div>
           </form>
@@ -197,23 +203,23 @@ export default function VehiclesList() {
                         : 'bg-purple-100 text-purple-800'
                     }`}
                   >
-                    {vehicle.type}
+                    {translateVehicleType(vehicle.type, t)}
                   </span>
                 </div>
 
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Year</span>
+                    <span className="text-gray-600">{t('vehicle.buildYear')}</span>
                     <span className="font-medium text-gray-900">{vehicle.year}</span>
                   </div>
                   {vehicle.licensePlate && (
                     <div className="flex items-center justify-between text-sm mt-1">
-                      <span className="text-gray-600">License</span>
+                      <span className="text-gray-600">{t('vehicle.licensePlate')}</span>
                       <span className="font-medium text-gray-900">{vehicle.licensePlate}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between text-sm mt-1">
-                    <span className="text-gray-600">Cost Entries</span>
+                    <span className="text-gray-600">{t('vehicle.costEntries')}</span>
                     <span className="font-medium text-gray-900">
                       {vehicle._count?.costEntries || 0}
                     </span>
@@ -230,16 +236,16 @@ export default function VehiclesList() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🚗</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No vehicles yet
+              {t('vehicle.noVehiclesYet')}
             </h3>
             <p className="text-gray-600 mb-4">
-              Add your first vehicle to start tracking costs
+              {t('vehicle.addFirstVehicle')}
             </p>
             <button
               onClick={() => setShowForm(true)}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Add Vehicle
+              {t('vehicle.addVehicle')}
             </button>
           </div>
         </Card>

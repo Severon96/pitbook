@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface LayoutProps {
   children: ReactNode;
@@ -7,6 +9,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -33,7 +36,7 @@ export default function Layout({ children }: LayoutProps) {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
-                  Dashboard
+                  {t('nav.dashboard')}
                 </Link>
                 <Link
                   to="/vehicles"
@@ -43,9 +46,12 @@ export default function Layout({ children }: LayoutProps) {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
-                  Vehicles
+                  {t('nav.vehicles')}
                 </Link>
               </div>
+            </div>
+            <div className="flex items-center">
+              <LanguageSwitcher />
             </div>
           </div>
         </div>
