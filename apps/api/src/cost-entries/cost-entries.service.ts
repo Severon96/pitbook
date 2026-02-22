@@ -35,46 +35,51 @@ export class CostEntriesService {
   async create(dto: CreateCostEntryDto) {
     const { items, totalAmount, vehicleId, seasonId, category, title, date, notes, receiptUrl, source } = dto;
 
-    // Calculate totalAmount from items if items are provided
-    const computedTotal =
-      items && items.length > 0
-        ? items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
-        : totalAmount ?? 0;
+    try {
+      // Calculate totalAmount from items if items are provided
+      const computedTotal =
+        items && items.length > 0
+          ? items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
+          : totalAmount ?? 0;
 
-    return await this.drizzle.db.transaction(async (tx) => {
-      const [newEntry] = await tx
-        .insert(costEntries)
-        .values({
-          vehicleId,
-          seasonId,
-          category,
-          title,
-          date,
-          totalAmount: computedTotal.toString(),
-          notes,
-          receiptUrl,
-          source: source ?? 'MANUAL',
-        })
-        .returning();
-
-      let createdItems = [];
-      if (items && items.length > 0) {
-        createdItems = await tx
-          .insert(costEntryItems)
-          .values(
-            items.map((item) => ({
-              costEntryId: newEntry.id,
-              description: item.description,
-              quantity: item.quantity.toString(),
-              unitPrice: item.unitPrice.toString(),
-              amount: (item.quantity * item.unitPrice).toString(),
-            }))
-          )
+      return await this.drizzle.db.transaction(async (tx) => {
+        const [newEntry] = await tx
+          .insert(costEntries)
+          .values({
+            vehicleId,
+            seasonId,
+            category,
+            title,
+            date: new Date(date),
+            totalAmount: computedTotal.toString(),
+            notes,
+            receiptUrl,
+            source: source ?? 'MANUAL',
+          })
           .returning();
-      }
 
-      return { ...newEntry, items: createdItems };
-    });
+        let createdItems = [];
+        if (items && items.length > 0) {
+          createdItems = await tx
+            .insert(costEntryItems)
+            .values(
+              items.map((item) => ({
+                costEntryId: newEntry.id,
+                description: item.description,
+                quantity: item.quantity.toString(),
+                unitPrice: item.unitPrice.toString(),
+                amount: (item.quantity * item.unitPrice).toString(),
+              }))
+            )
+            .returning();
+        }
+
+        return { ...newEntry, items: createdItems };
+      });
+    } catch (error) {
+      console.error('Error creating cost entry:', error);
+      throw error;
+    }
   }
 
   async remove(id: string) {

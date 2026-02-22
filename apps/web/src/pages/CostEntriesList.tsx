@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useVehicle } from '../api/vehicles';
 import { useCostEntries, useCreateCostEntry, useDeleteCostEntry, CostCategory } from '../api/costEntries';
 import Card from '../components/Card';
 import { format } from 'date-fns';
+import { translateCostCategory } from '../utils/translations';
 
 const CATEGORIES: CostCategory[] = ['FUEL', 'SERVICE', 'REPAIR', 'INSURANCE', 'TAX', 'PARTS', 'OTHER'];
 
 export default function CostEntriesList() {
+  const { t } = useTranslation();
   const { vehicleId } = useParams<{ vehicleId: string }>();
   const { data: vehicle } = useVehicle(vehicleId!);
   const { data: costEntries, isLoading } = useCostEntries(vehicleId!);
@@ -47,7 +50,7 @@ export default function CostEntriesList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this cost entry?')) {
+    if (!confirm(t('cost.deleteCostEntryConfirm'))) {
       return;
     }
     try {
@@ -62,6 +65,17 @@ export default function CostEntriesList() {
       style: 'currency',
       currency: 'EUR',
     }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
+  };
+
+  const formatDate = (date: string | Date | null | undefined): string => {
+    if (!date) return '-';
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      if (isNaN(dateObj.getTime())) return '-';
+      return format(dateObj, 'MMM d, yyyy');
+    } catch {
+      return '-';
+    }
   };
 
   const getCategoryColor = (category: CostCategory) => {
@@ -80,7 +94,7 @@ export default function CostEntriesList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -95,9 +109,9 @@ export default function CostEntriesList() {
             to={`/vehicles/${vehicleId}`}
             className="text-sm text-blue-600 hover:text-blue-700 mb-2 inline-block"
           >
-            ← Back to Vehicle
+            ← {t('cost.backToVehicle')}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Cost Entries</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('vehicle.costEntries')}</h1>
           {vehicle && (
             <p className="mt-1 text-gray-600">
               {vehicle.name} - {vehicle.brand} {vehicle.model}
@@ -108,30 +122,30 @@ export default function CostEntriesList() {
           onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          {showForm ? 'Cancel' : '+ Add Cost Entry'}
+          {showForm ? t('common.cancel') : `+ ${t('cost.addCostEntry')}`}
         </button>
       </div>
 
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Total Costs</p>
+            <p className="text-sm text-gray-600">{t('cost.totalCosts')}</p>
             <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalCosts)}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-600">Entries</p>
+            <p className="text-sm text-gray-600">{t('cost.entries')}</p>
             <p className="text-3xl font-bold text-gray-900">{costEntries?.length || 0}</p>
           </div>
         </div>
       </Card>
 
       {showForm && (
-        <Card title="Add Cost Entry">
+        <Card title={t('cost.addCostEntry')}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category *
+                  {t('cost.category')} *
                 </label>
                 <select
                   value={formData.category}
@@ -140,7 +154,7 @@ export default function CostEntriesList() {
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
-                      {cat}
+                      {translateCostCategory(cat, t)}
                     </option>
                   ))}
                 </select>
@@ -148,7 +162,7 @@ export default function CostEntriesList() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date *
+                  {t('cost.date')} *
                 </label>
                 <input
                   type="date"
@@ -161,7 +175,7 @@ export default function CostEntriesList() {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title *
+                  {t('cost.title')} *
                 </label>
                 <input
                   type="text"
@@ -169,13 +183,13 @@ export default function CostEntriesList() {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Oil change, Fuel fillup"
+                  placeholder={t('placeholders.costTitle')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount (€) *
+                  {t('cost.amount')} (€) *
                 </label>
                 <input
                   type="number"
@@ -184,21 +198,21 @@ export default function CostEntriesList() {
                   value={formData.totalAmount}
                   onChange={(e) => setFormData({ ...formData, totalAmount: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder={t('placeholders.amount')}
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Notes
+                {t('vehicle.notes')}
               </label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Additional details..."
+                placeholder={t('placeholders.additionalDetails')}
               />
             </div>
 
@@ -208,14 +222,14 @@ export default function CostEntriesList() {
                 disabled={createCostEntry.isPending}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
-                {createCostEntry.isPending ? 'Creating...' : 'Add Entry'}
+                {createCostEntry.isPending ? t('cost.creating') : t('cost.addEntry')}
               </button>
             </div>
           </form>
         </Card>
       )}
 
-      <Card title="Cost History">
+      <Card title={t('cost.costHistory')}>
         {costEntries && costEntries.length > 0 ? (
           <div className="space-y-3">
             {costEntries.map((entry) => (
@@ -226,12 +240,12 @@ export default function CostEntriesList() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(entry.category)}`}>
-                      {entry.category}
+                      {translateCostCategory(entry.category, t)}
                     </span>
                     <h3 className="font-medium text-gray-900">{entry.title}</h3>
                   </div>
                   <p className="text-sm text-gray-600">
-                    {format(new Date(entry.date), 'MMM d, yyyy')}
+                    {formatDate(entry.date)}
                   </p>
                   {entry.notes && (
                     <p className="text-sm text-gray-600 mt-1">{entry.notes}</p>
@@ -248,7 +262,7 @@ export default function CostEntriesList() {
                     onClick={() => handleDelete(entry.id)}
                     className="text-red-600 hover:text-red-700 text-sm"
                   >
-                    Delete
+                    {t('common.delete')}
                   </button>
                 </div>
               </div>
@@ -258,16 +272,16 @@ export default function CostEntriesList() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">💰</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No cost entries yet
+              {t('cost.noCostEntriesYet')}
             </h3>
             <p className="text-gray-600 mb-4">
-              Add your first cost entry to start tracking expenses
+              {t('cost.addFirstCostEntry')}
             </p>
             <button
               onClick={() => setShowForm(true)}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Add Cost Entry
+              {t('cost.addCostEntry')}
             </button>
           </div>
         )}

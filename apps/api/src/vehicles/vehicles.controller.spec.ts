@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { VehiclesController } from './vehicles.controller';
 import { VehiclesService } from './vehicles.service';
+import { VehicleOwnershipGuard } from '../auth/guards/vehicle-ownership.guard';
 
 describe('VehiclesController', () => {
   let controller: VehiclesController;
@@ -37,6 +38,10 @@ describe('VehiclesController', () => {
     getSummary: jest.fn(),
   };
 
+  const mockVehicleOwnershipGuard = {
+    canActivate: jest.fn(() => true),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [VehiclesController],
@@ -46,7 +51,10 @@ describe('VehiclesController', () => {
           useValue: mockVehiclesService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(VehicleOwnershipGuard)
+      .useValue(mockVehicleOwnershipGuard)
+      .compile();
 
     controller = module.get<VehiclesController>(VehiclesController);
     service = module.get<VehiclesService>(VehiclesService);
@@ -63,12 +71,13 @@ describe('VehiclesController', () => {
   describe('findAll', () => {
     it('should return an array of vehicles', async () => {
       const vehicles = [mockVehicle];
+      const mockUser = { id: 'user-123', role: 'USER' };
       mockVehiclesService.findAll.mockResolvedValue(vehicles);
 
-      const result = await controller.findAll();
+      const result = await controller.findAll(mockUser);
 
       expect(result).toEqual(vehicles);
-      expect(service.findAll).toHaveBeenCalled();
+      expect(service.findAll).toHaveBeenCalledWith('user-123', 'USER');
     });
   });
 
@@ -93,13 +102,14 @@ describe('VehiclesController', () => {
         type: 'DAILY' as const,
       };
 
+      const mockUser = { id: 'user-123', role: 'USER' };
       const newVehicle = { ...mockVehicle, ...createDto };
       mockVehiclesService.create.mockResolvedValue(newVehicle);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create(createDto, mockUser);
 
       expect(result).toEqual(newVehicle);
-      expect(service.create).toHaveBeenCalledWith(createDto);
+      expect(service.create).toHaveBeenCalledWith(createDto, 'user-123');
     });
   });
 

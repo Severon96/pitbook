@@ -5,29 +5,28 @@
 
 FROM node:20-alpine AS base
 WORKDIR /app
-RUN corepack enable && corepack prepare yarn@stable --activate
 
 # ── Development ───────────────────────────
 FROM base AS development
-COPY package.json yarn.lock .yarnrc.yml* ./
+COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/types/package.json ./packages/types/
-RUN yarn install
+RUN npm ci
 
 COPY . .
 EXPOSE 3000
 WORKDIR /app/apps/web
-CMD ["yarn", "dev"]
+CMD ["npm", "run", "dev"]
 
 # ── Build ─────────────────────────────────
 FROM base AS build
-COPY package.json yarn.lock .yarnrc.yml* ./
+COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/types/package.json ./packages/types/
-RUN yarn install --frozen-lockfile
+RUN npm ci
 
 COPY . .
-RUN yarn workspace @pitbook/web build
+RUN npm run build --workspace=@pitbook/web
 
 # ── Production (nginx) ────────────────────
 FROM nginx:alpine AS production
