@@ -1,6 +1,6 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {SpritmonitorService} from './spritmonitor.service';
-import {DrizzleService} from '../drizzle/drizzle.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { SpritmonitorService } from './spritmonitor.service';
+import { DrizzleService } from '../drizzle/drizzle.service';
 import axios from 'axios';
 
 jest.mock('axios');
@@ -8,7 +8,6 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('SpritmonitorService', () => {
   let service: SpritmonitorService;
-  let drizzleService: DrizzleService;
 
   const mockVehicle = {
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -19,7 +18,6 @@ describe('SpritmonitorService', () => {
     type: 'SEASONAL' as const,
     spritmonitorVehicleId: '12345',
     spritmonitorApiKey: 'test-api-key',
-    spritmonitorLastSync: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -28,14 +26,8 @@ describe('SpritmonitorService', () => {
     query: {
       vehicles: {
         findFirst: jest.fn(),
-        findMany: jest.fn(),
-      },
-      fuelLogs: {
-        findFirst: jest.fn(),
       },
     },
-    transaction: jest.fn(),
-    update: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -44,15 +36,12 @@ describe('SpritmonitorService', () => {
         SpritmonitorService,
         {
           provide: DrizzleService,
-          useValue: {
-            db: mockDb,
-          },
+          useValue: { db: mockDb },
         },
       ],
     }).compile();
 
     service = module.get<SpritmonitorService>(SpritmonitorService);
-    drizzleService = module.get<DrizzleService>(DrizzleService);
   });
 
   afterEach(() => {
@@ -67,12 +56,7 @@ describe('SpritmonitorService', () => {
     it('should fetch vehicles from Spritmonitor API', async () => {
       const mockApiResponse = {
         data: [
-          {
-            id: '12345',
-            make: 'Porsche',
-            model: '911',
-            year: 1998,
-          },
+          { id: '12345', make: 'Porsche', model: '911' },
         ],
       };
 
@@ -86,101 +70,58 @@ describe('SpritmonitorService', () => {
         expect.objectContaining({
           headers: {
             Authorization: 'Bearer test-api-key',
-            'Application-Id': 'Pitbook',
+            'Application-Id': '190e3b1080a39777f369a4e9875df3d7',
           },
         })
       );
     });
 
-    it('should handle API errors', async () => {
+    it('should propagate API errors', async () => {
       mockedAxios.get.mockRejectedValue(new Error('API Error'));
-
-      await expect(service.getVehicles('invalid-key')).rejects.toThrow();
+      await expect(service.getVehicles('invalid-key')).rejects.toThrow('API Error');
     });
   });
 
-  describe('linkVehicle', () => {
-    it('should link a vehicle to Spritmonitor', async () => {
-      mockDb.update.mockReturnValue({
-        set: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            returning: jest.fn().mockResolvedValue([
-              {
-                ...mockVehicle,
-                spritmonitorVehicleId: '12345',
-                spritmonitorApiKey: 'new-api-key',
-              },
-            ]),
-          }),
-        }),
-      });
-
-      const result = await service.linkVehicle(
-        '550e8400-e29b-41d4-a716-446655440000',
-        '12345',
-        'new-api-key'
-      );
-
-      expect(result.spritmonitorVehicleId).toBe('12345');
-      expect(result.spritmonitorApiKey).toBe('new-api-key');
-    });
-  });
-
-  describe('syncVehicle', () => {
-    it('should sync fuel logs from Spritmonitor', async () => {
+  describe('getStats', () => {
+    it('should return consumption stats for a linked vehicle', async () => {
       mockDb.query.vehicles.findFirst.mockResolvedValue(mockVehicle);
-      mockDb.query.fuelLogs.findFirst.mockResolvedValue(null); // No existing fuel log
 
-      const mockFuelLogsResponse = {
+      mockedAxios.get.mockResolvedValue({
         data: [
-          {
-            id: '1',
-            date: '2024-01-15',
-            quantity: 50.5,
-            fuelprice: 1.50,
-            odometer: 10000,
-            fulltank: true,
-          },
+          { id: '12345', make: 'Porsche', model: '911', consumption: '7.2', consumptionunit: 'l/100km' },
         ],
-      };
-
-      mockedAxios.get.mockResolvedValue(mockFuelLogsResponse);
-
-      mockDb.transaction = jest.fn(async (callback) => {
-        const tx = {
-          insert: jest.fn().mockReturnValue({
-            values: jest.fn().mockReturnValue({
-              onConflictDoNothing: jest.fn().mockResolvedValue(undefined),
-            }),
-          }),
-        };
-        await callback(tx);
-        return {synced: 1, skipped: 0};
-      });
-      mockDb.update.mockReturnValue({
-        set: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue(undefined),
-        }),
       });
 
-      const result = await service.syncVehicle('550e8400-e29b-41d4-a716-446655440000');
+      const result = await service.getStats(mockVehicle.id);
 
-      expect(result).toHaveProperty('synced');
-      expect(result).toHaveProperty('skipped');
-      expect(mockedAxios.get).toHaveBeenCalled();
+      expect(result).toEqual({ consumption: '7.2', consumptionunit: 'l/100km' });
     });
 
-    it('should throw error when vehicle not linked', async () => {
+    it('should return null when vehicle is not linked', async () => {
       mockDb.query.vehicles.findFirst.mockResolvedValue({
         ...mockVehicle,
         spritmonitorVehicleId: null,
         spritmonitorApiKey: null,
       });
 
-      await expect(service.syncVehicle('550e8400-e29b-41d4-a716-446655440000')).rejects.toThrow(
-        'Vehicle not linked to Spritmonitor'
-      );
+      const result = await service.getStats(mockVehicle.id);
+
+      expect(result).toBeNull();
+      expect(mockedAxios.get).not.toHaveBeenCalled();
+    });
+
+    it('should return null when Spritmonitor vehicle id not found in API response', async () => {
+      mockDb.query.vehicles.findFirst.mockResolvedValue(mockVehicle);
+
+      mockedAxios.get.mockResolvedValue({
+        data: [
+          { id: '99999', make: 'BMW', model: 'M3', consumption: '9.5', consumptionunit: 'l/100km' },
+        ],
+      });
+
+      const result = await service.getStats(mockVehicle.id);
+
+      expect(result).toBeNull();
     });
   });
-
 });

@@ -142,5 +142,41 @@
     "costTitle": "z.B. Ölwechsel, Tanken",
     "amount": "0,00",
     "additionalDetails": "Weitere Details..."
+  },
+  "todo": {
+    "todos": "Todos",
+    "todoList": "Todo-Liste",
+    "addTodo": "Todo hinzufügen",
+    "noTodosYet": "Noch keine Todos",
+    "title": "Titel",
+    "status": {
+      "OPEN": "Offen",
+      "DONE": "Erledigt"
+    },
+    "parts": "Teile",
+    "addPart": "Teil hinzufügen",
+    "partName": "Bezeichnung",
+    "partLink": "Link",
+    "partPrice": "Preis",
+    "partNotes": "Anmerkung",
+    "totalPrice": "Gesamtpreis",
+    "deleteTodoConfirm": "Todo wirklich löschen?"
+  },
+  "spritmonitor": {
+    "title": "Spritmonitor",
+    "apiKey": "API-Schlüssel",
+    "findVehicles": "Fahrzeuge suchen",
+    "selectVehicle": "Fahrzeug auswählen",
+    "link": "Verknüpfen",
+    "unlink": "Verknüpfung aufheben",
+    "avgConsumption": "Ø Verbrauch",
+    "openInSpritmonitor": "Auf Spritmonitor öffnen",
+    "notLinked": "Kein Spritmonitor verknüpft"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System",
+    "toggle": "Design wechseln"
   }
 }

@@ -142,5 +142,41 @@
     "costTitle": "e.g., Oil change, Fuel fillup",
     "amount": "0.00",
     "additionalDetails": "Additional details..."
+  },
+  "todo": {
+    "todos": "Todos",
+    "todoList": "Todo List",
+    "addTodo": "Add Todo",
+    "noTodosYet": "No todos yet",
+    "title": "Title",
+    "status": {
+      "OPEN": "Open",
+      "DONE": "Done"
+    },
+    "parts": "Parts",
+    "addPart": "Add Part",
+    "partName": "Name",
+    "partLink": "Link",
+    "partPrice": "Price",
+    "partNotes": "Notes",
+    "totalPrice": "Total Price",
+    "deleteTodoConfirm": "Really delete this todo?"
+  },
+  "spritmonitor": {
+    "title": "Spritmonitor",
+    "apiKey": "API Key",
+    "findVehicles": "Find Vehicles",
+    "selectVehicle": "Select vehicle",
+    "link": "Link",
+    "unlink": "Unlink",
+    "avgConsumption": "Avg. Consumption",
+    "openInSpritmonitor": "Open in Spritmonitor",
+    "notLinked": "No Spritmonitor linked"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle theme"
   }
 }

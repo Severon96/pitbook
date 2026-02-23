@@ -1,143 +1,57 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Injectable } from '@nestjs/common';
 import { DrizzleService } from '../drizzle/drizzle.service';
-import { eq, and, isNotNull } from 'drizzle-orm';
-import { vehicles, fuelLogs, costEntries } from '@pitbook/db';
+import { eq } from 'drizzle-orm';
+import { vehicles } from '@pitbook/db';
 import axios from 'axios';
 
 const SPRITMONITOR_API = 'https://api.spritmonitor.de/v1';
+// Public app token assigned by Spritmonitor for community integrations
+const SPRITMONITOR_APP_TOKEN = '190e3b1080a39777f369a4e9875df3d7';
 
 @Injectable()
 export class SpritmonitorService {
-  private readonly logger = new Logger(SpritmonitorService.name);
-
   constructor(private drizzle: DrizzleService) {}
 
   /**
-   * Get all vehicles from Spritmonitor account
+   * Fetch all vehicles from a Spritmonitor account using the given API key.
    */
-  async getVehicles(apiKey: string) {
+  async getVehicles(apiKey: string): Promise<Array<{ id: string; make: string; model: string }>> {
     const response = await axios.get(`${SPRITMONITOR_API}/vehicles.json`, {
-      headers: { Authorization: `Bearer ${apiKey}`, 'Application-Id': 'Pitbook' },
+      headers: { Authorization: `Bearer ${apiKey}`, 'Application-Id': SPRITMONITOR_APP_TOKEN },
     });
     return response.data;
   }
 
   /**
-   * Link a local vehicle to a Spritmonitor vehicle ID
+   * Fetch the current average fuel consumption for a linked local vehicle.
+   * Returns null if the vehicle is not linked to Spritmonitor.
    */
-  async linkVehicle(vehicleId: string, spritmonitorVehicleId: string, apiKey: string) {
-    const [updated] = await this.drizzle.db
-      .update(vehicles)
-      .set({ spritmonitorVehicleId, spritmonitorApiKey: apiKey })
-      .where(eq(vehicles.id, vehicleId))
-      .returning();
-    return updated;
-  }
-
-  /**
-   * Sync fuel logs for a single vehicle
-   */
-  async syncVehicle(vehicleId: string): Promise<{ synced: number; skipped: number }> {
+  async getStats(localVehicleId: string): Promise<{ consumption: string; consumptionunit: string } | null> {
     const vehicle = await this.drizzle.db.query.vehicles.findFirst({
-      where: eq(vehicles.id, vehicleId),
+      where: eq(vehicles.id, localVehicleId),
     });
 
     if (!vehicle?.spritmonitorVehicleId || !vehicle?.spritmonitorApiKey) {
-      throw new Error('Vehicle not linked to Spritmonitor');
+      return null;
     }
 
-    const response = await axios.get(
-      `${SPRITMONITOR_API}/vehicle/${vehicle.spritmonitorVehicleId}/fuelups.json`,
-      {
-        headers: {
-          Authorization: `Bearer ${vehicle.spritmonitorApiKey}`,
-          'Application-Id': 'Pitbook',
-        },
+    const response = await axios.get(`${SPRITMONITOR_API}/vehicles.json`, {
+      headers: {
+        Authorization: `Bearer ${vehicle.spritmonitorApiKey}`,
+        'Application-Id': SPRITMONITOR_APP_TOKEN,
       },
-    );
-
-    const fuelups: any[] = response.data;
-    let synced = 0;
-    let skipped = 0;
-
-    for (const fuelup of fuelups) {
-      const spritmonitorId = String(fuelup.id);
-
-      // Deduplication: skip if already imported
-      const existing = await this.drizzle.db.query.fuelLogs.findFirst({
-        where: and(
-          eq(fuelLogs.vehicleId, vehicleId),
-          eq(fuelLogs.spritmonitorId, spritmonitorId)
-        ),
-      });
-
-      if (existing) {
-        skipped++;
-        continue;
-      }
-
-      const totalCost = fuelup.fuelprice * fuelup.quantity;
-
-      await this.drizzle.db.transaction(async (tx) => {
-        // Create fuel log
-        await tx.insert(fuelLogs).values({
-          vehicleId,
-          spritmonitorId,
-          date: new Date(fuelup.date),
-          liters: fuelup.quantity.toString(),
-          pricePerLiter: fuelup.fuelprice.toString(),
-          totalCost: totalCost.toString(),
-          mileage: fuelup.odometer,
-          fullTank: fuelup.fulltank ?? true,
-          lastSyncedAt: new Date(),
-        });
-
-        // Also create a cost entry for the fuel log
-        await tx.insert(costEntries).values({
-          vehicleId,
-          category: 'FUEL',
-          title: `Tanken – ${fuelup.quantity}L`,
-          date: new Date(fuelup.date),
-          totalAmount: totalCost.toString(),
-          source: 'SPRITMONITOR',
-          notes: `${fuelup.quantity}L @ ${fuelup.fuelprice}€/L | ${fuelup.odometer}km`,
-        });
-      });
-
-      synced++;
-    }
-
-    // Update last sync timestamp
-    await this.drizzle.db
-      .update(vehicles)
-      .set({ spritmonitorLastSync: new Date() })
-      .where(eq(vehicles.id, vehicleId));
-
-    this.logger.log(`Synced ${synced} fuelups for vehicle ${vehicleId} (${skipped} skipped)`);
-    return { synced, skipped };
-  }
-
-  /**
-   * Auto-sync all linked vehicles every 6 hours
-   */
-  @Cron(CronExpression.EVERY_6_HOURS)
-  async syncAllVehicles() {
-    const vehiclesToSync = await this.drizzle.db.query.vehicles.findMany({
-      where: and(
-        isNotNull(vehicles.spritmonitorApiKey),
-        isNotNull(vehicles.spritmonitorVehicleId)
-      ),
     });
 
-    this.logger.log(`Auto-sync: ${vehiclesToSync.length} linked vehicles`);
+    const apiVehicles: any[] = response.data;
+    const match = apiVehicles.find((v: any) => String(v.id) === vehicle.spritmonitorVehicleId);
 
-    for (const vehicle of vehiclesToSync) {
-      try {
-        await this.syncVehicle(vehicle.id);
-      } catch (err) {
-        this.logger.error(`Failed to sync vehicle ${vehicle.id}: ${err.message}`);
-      }
+    if (!match) {
+      return null;
     }
+
+    return {
+      consumption: match.consumption,
+      consumptionunit: match.consumptionunit,
+    };
   }
 }

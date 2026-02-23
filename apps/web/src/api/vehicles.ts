@@ -14,13 +14,11 @@ export interface Vehicle {
   notes?: string;
   spritmonitorVehicleId?: string;
   spritmonitorApiKey?: string;
-  spritmonitorLastSync?: string;
   createdAt: string;
   updatedAt: string;
   seasons?: Season[];
   _count?: {
     costEntries: number;
-    fuelLogs: number;
   };
 }
 
