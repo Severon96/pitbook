@@ -1,5 +1,5 @@
-import { Controller, Post, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { SpritmonitorService } from './spritmonitor.service';
 
 @ApiTags('Spritmonitor')
@@ -7,15 +7,16 @@ import { SpritmonitorService } from './spritmonitor.service';
 export class SpritmonitorController {
   constructor(private readonly spritmonitorService: SpritmonitorService) {}
 
-  @Post('sync/:vehicleId')
-  @ApiOperation({ summary: 'Manually trigger sync for a vehicle' })
-  async syncVehicle(@Param('vehicleId') vehicleId: string) {
-    return this.spritmonitorService.syncVehicle(vehicleId);
+  @Get('stats/:vehicleId')
+  @ApiOperation({ summary: 'Get current average fuel consumption for a linked vehicle' })
+  getStats(@Param('vehicleId') vehicleId: string) {
+    return this.spritmonitorService.getStats(vehicleId);
   }
 
-  @Post('sync-all')
-  @ApiOperation({ summary: 'Sync all vehicles with Spritmonitor integration' })
-  async syncAll() {
-    return this.spritmonitorService.syncAllVehicles();
+  @Get('vehicles')
+  @ApiOperation({ summary: 'List vehicles from a Spritmonitor account' })
+  @ApiQuery({ name: 'apiKey', required: true })
+  getVehicles(@Query('apiKey') apiKey: string) {
+    return this.spritmonitorService.getVehicles(apiKey);
   }
 }

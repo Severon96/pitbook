@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useVehicle, useVehicleSummary, useDeleteVehicle } from '../api/vehicles';
+import { useVehicle, useVehicleSummary, useDeleteVehicle, useUpdateVehicle } from '../api/vehicles';
 import { useCostEntries } from '../api/costEntries';
 import { exportVehicleCostsCsv } from '../api/reports';
+import { useSpritmonitorStats, useSpritmonitorVehicles } from '../api/spritmonitor';
 import Card from '../components/Card';
 import { format } from 'date-fns';
 import { translateVehicleType, translateCostCategory, translateSeasonStatus } from '../utils/translations';
@@ -16,9 +17,18 @@ export default function VehicleDetail() {
   const { data: summary } = useVehicleSummary(id!);
   const { data: costEntries } = useCostEntries(id!);
   const deleteVehicle = useDeleteVehicle();
+  const updateVehicle = useUpdateVehicle();
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportFilter, setExportFilter] = useState<'all' | 'year'>('all');
   const [selectedYear, setSelectedYear] = useState<string>('');
+
+  // Spritmonitor link flow
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [searchApiKey, setSearchApiKey] = useState<string | null>(null);
+  const [selectedSpritmonitorId, setSelectedSpritmonitorId] = useState('');
+  const { data: spritmonitorStats } = useSpritmonitorStats(id!);
+  const { data: spritmonitorVehicles, isFetching: isFetchingVehicles, isError: vehiclesError } =
+    useSpritmonitorVehicles(searchApiKey);
 
   const handleDelete = async () => {
     if (!confirm(t('vehicle.deleteConfirm'))) {
@@ -256,6 +266,97 @@ export default function VehicleDetail() {
             </div>
           </Card>
         )}
+
+        <Card title={t('spritmonitor.title')}>
+          {vehicle.spritmonitorVehicleId ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{t('spritmonitor.avgConsumption')}</span>
+                <span className="text-lg font-bold text-gray-900">
+                  {spritmonitorStats
+                    ? `Ø ${spritmonitorStats.consumption} ${spritmonitorStats.consumptionunit}`
+                    : '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                <a
+                  href={`https://www.spritmonitor.de/de/fahrzeug/${vehicle.spritmonitorVehicleId}.html`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-700"
+                >
+                  {t('spritmonitor.openInSpritmonitor')} ↗
+                </a>
+                <button
+                  onClick={() =>
+                    updateVehicle.mutate({
+                      id: id!,
+                      spritmonitorVehicleId: null as any,
+                      spritmonitorApiKey: null as any,
+                    })
+                  }
+                  disabled={updateVehicle.isPending}
+                  className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                >
+                  {t('spritmonitor.unlink')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-500">{t('spritmonitor.notLinked')}</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder={t('spritmonitor.apiKey')}
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+                <button
+                  onClick={() => setSearchApiKey(apiKeyInput.trim() || null)}
+                  disabled={!apiKeyInput.trim() || isFetchingVehicles}
+                  className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isFetchingVehicles ? '…' : t('spritmonitor.findVehicles')}
+                </button>
+              </div>
+              {vehiclesError && (
+                <p className="text-sm text-red-600">API key invalid or request failed.</p>
+              )}
+              {spritmonitorVehicles && spritmonitorVehicles.length > 0 && (
+                <div className="space-y-2">
+                  <select
+                    value={selectedSpritmonitorId}
+                    onChange={(e) => setSelectedSpritmonitorId(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="">{t('spritmonitor.selectVehicle')}</option>
+                    {spritmonitorVehicles.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.make} {v.model}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => {
+                      if (!selectedSpritmonitorId) return;
+                      updateVehicle.mutate({
+                        id: id!,
+                        spritmonitorVehicleId: selectedSpritmonitorId,
+                        spritmonitorApiKey: apiKeyInput.trim(),
+                      });
+                    }}
+                    disabled={!selectedSpritmonitorId || updateVehicle.isPending}
+                    className="w-full px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {updateVehicle.isPending ? '…' : t('spritmonitor.link')}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
       </div>
 
       {/* Export Modal */}

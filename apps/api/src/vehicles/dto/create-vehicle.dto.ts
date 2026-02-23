@@ -10,4 +10,6 @@ export class CreateVehicleDto {
   @ApiPropertyOptional() @IsOptional() @IsString() licensePlate?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() vin?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() spritmonitorVehicleId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() spritmonitorApiKey?: string;
 }

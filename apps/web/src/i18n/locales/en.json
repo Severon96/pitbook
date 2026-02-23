@@ -162,6 +162,17 @@
     "totalPrice": "Total Price",
     "deleteTodoConfirm": "Really delete this todo?"
   },
+  "spritmonitor": {
+    "title": "Spritmonitor",
+    "apiKey": "API Key",
+    "findVehicles": "Find Vehicles",
+    "selectVehicle": "Select vehicle",
+    "link": "Link",
+    "unlink": "Unlink",
+    "avgConsumption": "Avg. Consumption",
+    "openInSpritmonitor": "Open in Spritmonitor",
+    "notLinked": "No Spritmonitor linked"
+  },
   "theme": {
     "light": "Light",
     "dark": "Dark",

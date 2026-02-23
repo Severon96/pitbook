@@ -8,11 +8,12 @@ Track maintenance, repairs, fuel costs, and seasonal expenses for your daily dri
 
 ## Features
 
-- 🚗 **Daily vehicle** management 
+- 🚗 **Daily vehicle** management
 - 🏎️ **Seasonal vehicles** management
 - 🔧 **Cost breakdowns** — Service, repair, fuel costs
 - 📊 **Reports** — per season, per year, or all-time
 - 📥 **Export** — CSV/PDF export with full item breakdown
+- ⛽ **Spritmonitor integration** — link a vehicle and display live average fuel consumption
 
 ---
 
@@ -137,3 +138,27 @@ FRONTEND_URL=http://localhost:3000
 3. After successful authentication, users are redirected back to Pitbook
 4. User accounts are automatically created from the OAuth profile data
 5. No password is stored for OAuth users
+
+---
+
+## Spritmonitor Integration
+
+Pitbook can display your vehicle's current average fuel consumption directly from [Spritmonitor.de](https://www.spritmonitor.de).
+
+### Setup
+
+1. **Get your API key** — log in to Spritmonitor and generate an API key at [My Account → Change Password](https://www.spritmonitor.de/en/my_account/change_password.html) (the token field is at the bottom of that page).
+
+2. **Link a vehicle** — open a vehicle's detail page in Pitbook and find the **Spritmonitor** card:
+   - Enter your API key and click **Find Vehicles**
+   - Select the matching vehicle from the dropdown
+   - Click **Link**
+
+3. **Done** — the card now shows the live average consumption (e.g. `Ø 7.2 l/100km`) and a direct link to the vehicle's Spritmonitor page.
+
+To remove the link, click **Unlink** in the Spritmonitor card.
+
+### Notes
+
+- The API key and Spritmonitor vehicle ID are stored per vehicle, so you can link different vehicles to different Spritmonitor accounts.
+- Consumption data is fetched live from the Spritmonitor API each time you open the vehicle detail page; nothing is cached or synced locally.

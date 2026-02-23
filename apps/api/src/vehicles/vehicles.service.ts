@@ -3,7 +3,7 @@ import {DrizzleService} from '../drizzle/drizzle.service';
 import {CreateVehicleDto} from './dto/create-vehicle.dto';
 import {UpdateVehicleDto} from './dto/update-vehicle.dto';
 import {count, eq, sum} from 'drizzle-orm';
-import {costEntries, fuelLogs, vehicles, vehicleShares} from '@pitbook/db';
+import {costEntries, vehicles, vehicleShares} from '@pitbook/db';
 
 @Injectable()
 export class VehiclesService {
@@ -28,16 +28,10 @@ export class VehiclesService {
             .from(costEntries)
             .where(eq(costEntries.vehicleId, v.id));
 
-          const [fuelCount] = await this.drizzle.db
-            .select({ count: count() })
-            .from(fuelLogs)
-            .where(eq(fuelLogs.vehicleId, v.id));
-
           return {
             ...v,
             _count: {
               costEntries: costCount.count,
-              fuelLogs: fuelCount.count,
             },
           };
         })
@@ -82,16 +76,10 @@ export class VehiclesService {
           .from(costEntries)
           .where(eq(costEntries.vehicleId, v.id));
 
-        const [fuelCount] = await this.drizzle.db
-          .select({ count: count() })
-          .from(fuelLogs)
-          .where(eq(fuelLogs.vehicleId, v.id));
-
         return {
           ...v,
           _count: {
             costEntries: costCount.count,
-            fuelLogs: fuelCount.count,
           },
         };
       })
