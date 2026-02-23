@@ -11,3 +11,16 @@
     @apply text-gray-900 dark:text-white dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400;
   }
 }
+
+/* Unlayered — wins over all @layer rules including Tailwind utilities */
+
+/* Remap text grays in dark mode so content stays readable inside dark cards */
+.dark .text-gray-900 { color: rgb(243 244 246); } /* → gray-100 */
+.dark .text-gray-800 { color: rgb(209 213 219); } /* → gray-300 */
+.dark .text-gray-700 { color: rgb(209 213 219); } /* → gray-300 */
+.dark .text-gray-600 { color: rgb(156 163 175); } /* → gray-400 */
+.dark .text-gray-500 { color: rgb(156 163 175); } /* → gray-400 */
+
+/* Remap light borders so dividers are visible on dark backgrounds */
+.dark .border-gray-100 { border-color: rgb(55 65 81); } /* → gray-700 */
+.dark .border-gray-200 { border-color: rgb(55 65 81); } /* → gray-700 */
