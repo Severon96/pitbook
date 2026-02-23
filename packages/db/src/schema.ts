@@ -73,7 +73,6 @@ export const vehicles = pgTable('vehicles', {
   // Spritmonitor integration
   spritmonitorVehicleId: text('spritmonitor_vehicle_id'),
   spritmonitorApiKey: text('spritmonitor_api_key'),
-  spritmonitorLastSync: timestamp('spritmonitor_last_sync', { withTimezone: true }),
 
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
@@ -153,41 +152,6 @@ export const costEntryItems = pgTable('cost_entry_items', {
   unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
   amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
 });
-
-export const fuelLogs = pgTable(
-  'fuel_logs',
-  {
-    id: uuid('id')
-      .primaryKey()
-      .$defaultFn(() => randomUUID()),
-    vehicleId: uuid('vehicle_id')
-      .notNull()
-      .references(() => vehicles.id, { onDelete: 'cascade' }),
-    spritmonitorId: text('spritmonitor_id'),
-    date: timestamp('date', { withTimezone: true }).notNull(),
-    liters: numeric('liters', { precision: 8, scale: 3 }).notNull(),
-    pricePerLiter: numeric('price_per_liter', { precision: 6, scale: 4 }).notNull(),
-    totalCost: numeric('total_cost', { precision: 10, scale: 2 }).notNull(),
-    mileage: integer('mileage').notNull(),
-    fullTank: boolean('full_tank').notNull().default(true),
-    notes: text('notes'),
-    lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
-
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (table) => ({
-    vehicleSpritmonitorUnique: unique('fuel_logs_vehicle_id_spritmonitor_id_key').on(
-      table.vehicleId,
-      table.spritmonitorId
-    ),
-    vehicleDateIdx: index('fuel_logs_vehicle_id_date_idx').on(
-      table.vehicleId,
-      table.date
-    ),
-  })
-);
 
 export const serviceRecords = pgTable(
   'service_records',
@@ -326,7 +290,6 @@ export const vehiclesRelations = relations(vehicles, ({ one, many }) => ({
   shares: many(vehicleShares),
   seasons: many(seasons),
   costEntries: many(costEntries),
-  fuelLogs: many(fuelLogs),
   serviceRecords: many(serviceRecords),
   todos: many(vehicleTodos),
 }));
@@ -356,13 +319,6 @@ export const costEntryItemsRelations = relations(costEntryItems, ({ one }) => ({
   costEntry: one(costEntries, {
     fields: [costEntryItems.costEntryId],
     references: [costEntries.id],
-  }),
-}));
-
-export const fuelLogsRelations = relations(fuelLogs, ({ one }) => ({
-  vehicle: one(vehicles, {
-    fields: [fuelLogs.vehicleId],
-    references: [vehicles.id],
   }),
 }));
 
@@ -426,7 +382,6 @@ export const schema = {
   seasons,
   costEntries,
   costEntryItems,
-  fuelLogs,
   serviceRecords,
   vehicleShares,
   oauthSessions,
@@ -438,7 +393,6 @@ export const schema = {
   seasonsRelations,
   costEntriesRelations,
   costEntryItemsRelations,
-  fuelLogsRelations,
   serviceRecordsRelations,
   vehicleSharesRelations,
   vehicleTodosRelations,
