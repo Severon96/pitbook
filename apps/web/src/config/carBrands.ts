@@ -78,7 +78,7 @@ export const CAR_BRANDS: CarBrand[] = [
   { name: 'Toyota', slug: 'toyota', color: '#EB0A1E' },
   { name: 'Volkswagen', slug: 'volkswagen', color: '#001E50' },
   { name: 'Volvo', slug: 'volvo', color: '#003057' },
-  { name: 'Other', slug: null, color: '#6B7280' },
+  { name: 'Other', color: '#6B7280' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 /**

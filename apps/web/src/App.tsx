@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import VehiclesList from './pages/VehiclesList';
 import VehicleDetail from './pages/VehicleDetail';
 import CostEntriesList from './pages/CostEntriesList';
+import TodoList from './pages/TodoList';
 import { Setup } from './pages/Setup';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -58,6 +59,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <CostEntriesList />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vehicles/:vehicleId/todos"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <TodoList />
               </Layout>
             </ProtectedRoute>
           }

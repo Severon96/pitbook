@@ -143,6 +143,25 @@
     "amount": "0,00",
     "additionalDetails": "Weitere Details..."
   },
+  "todo": {
+    "todos": "Todos",
+    "todoList": "Todo-Liste",
+    "addTodo": "Todo hinzufügen",
+    "noTodosYet": "Noch keine Todos",
+    "title": "Titel",
+    "status": {
+      "OPEN": "Offen",
+      "DONE": "Erledigt"
+    },
+    "parts": "Teile",
+    "addPart": "Teil hinzufügen",
+    "partName": "Bezeichnung",
+    "partLink": "Link",
+    "partPrice": "Preis",
+    "partNotes": "Anmerkung",
+    "totalPrice": "Gesamtpreis",
+    "deleteTodoConfirm": "Todo wirklich löschen?"
+  },
   "theme": {
     "light": "Hell",
     "dark": "Dunkel",
