@@ -22,6 +22,13 @@
       "when": 1771757482432,
       "tag": "0002_slow_hemingway",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1771867155190,
+      "tag": "0003_clean_silhouette",
+      "breakpoints": true
     }
   ]
 }

@@ -143,6 +143,25 @@
     "amount": "0.00",
     "additionalDetails": "Additional details..."
   },
+  "todo": {
+    "todos": "Todos",
+    "todoList": "Todo List",
+    "addTodo": "Add Todo",
+    "noTodosYet": "No todos yet",
+    "title": "Title",
+    "status": {
+      "OPEN": "Open",
+      "DONE": "Done"
+    },
+    "parts": "Parts",
+    "addPart": "Add Part",
+    "partName": "Name",
+    "partLink": "Link",
+    "partPrice": "Price",
+    "partNotes": "Notes",
+    "totalPrice": "Total Price",
+    "deleteTodoConfirm": "Really delete this todo?"
+  },
   "theme": {
     "light": "Light",
     "dark": "Dark",

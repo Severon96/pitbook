@@ -8,6 +8,7 @@ import { CostEntriesModule } from './cost-entries/cost-entries.module';
 import { SpritmonitorModule } from './spritmonitor/spritmonitor.module';
 import { ReportsModule } from './reports/reports.module';
 import { AuthModule } from './auth/auth.module';
+import { TodoItemsModule } from './todo-items/todo-items.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import * as path from 'path';
@@ -45,6 +46,7 @@ const envPath = path.join(projectRoot, '.env');
     CostEntriesModule,
     SpritmonitorModule,
     ReportsModule,
+    TodoItemsModule,
   ],
   providers: [
     {

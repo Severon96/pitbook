@@ -23,6 +23,7 @@ export const seasonStatusEnum = pgEnum('SeasonStatus', ['ACTIVE', 'CLOSED']);
 export const userRoleEnum = pgEnum('UserRole', ['ADMIN', 'USER']);
 export const authProviderEnum = pgEnum('AuthProvider', ['LOCAL', 'OIDC']);
 export const vehicleShareRoleEnum = pgEnum('VehicleShareRole', ['OWNER', 'EDITOR', 'VIEWER']);
+export const vehicleTodoStatusEnum = pgEnum('vehicle_todo_status', ['OPEN', 'DONE']);
 
 // ── Tables ────────────────────────────────
 
@@ -268,6 +269,47 @@ export const oauthSessions = pgTable(
   })
 );
 
+export const vehicleTodos = pgTable(
+  'vehicle_todos',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
+    vehicleId: uuid('vehicle_id')
+      .notNull()
+      .references(() => vehicles.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    status: vehicleTodoStatusEnum('status').notNull().default('OPEN'),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    vehicleIdIdx: index('vehicle_todos_vehicle_id_idx').on(table.vehicleId),
+  })
+);
+
+export const vehicleTodoParts = pgTable('vehicle_todo_parts', {
+  id: uuid('id')
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  todoId: uuid('todo_id')
+    .notNull()
+    .references(() => vehicleTodos.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  link: text('link'),
+  price: numeric('price', { precision: 10, scale: 2 }),
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // ── Relations ─────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -286,6 +328,7 @@ export const vehiclesRelations = relations(vehicles, ({ one, many }) => ({
   costEntries: many(costEntries),
   fuelLogs: many(fuelLogs),
   serviceRecords: many(serviceRecords),
+  todos: many(vehicleTodos),
 }));
 
 export const seasonsRelations = relations(seasons, ({ one, many }) => ({
@@ -351,6 +394,21 @@ export const vehicleSharesRelations = relations(vehicleShares, ({ one }) => ({
   }),
 }));
 
+export const vehicleTodosRelations = relations(vehicleTodos, ({ one, many }) => ({
+  vehicle: one(vehicles, {
+    fields: [vehicleTodos.vehicleId],
+    references: [vehicles.id],
+  }),
+  parts: many(vehicleTodoParts),
+}));
+
+export const vehicleTodoPartsRelations = relations(vehicleTodoParts, ({ one }) => ({
+  todo: one(vehicleTodos, {
+    fields: [vehicleTodoParts.todoId],
+    references: [vehicleTodos.id],
+  }),
+}));
+
 // Export schema object for drizzle-orm type inference
 export const schema = {
   // Enums
@@ -361,6 +419,7 @@ export const schema = {
   userRoleEnum,
   authProviderEnum,
   vehicleShareRoleEnum,
+  vehicleTodoStatusEnum,
   // Tables
   users,
   vehicles,
@@ -371,6 +430,8 @@ export const schema = {
   serviceRecords,
   vehicleShares,
   oauthSessions,
+  vehicleTodos,
+  vehicleTodoParts,
   // Relations
   usersRelations,
   vehiclesRelations,
@@ -380,4 +441,6 @@ export const schema = {
   fuelLogsRelations,
   serviceRecordsRelations,
   vehicleSharesRelations,
+  vehicleTodosRelations,
+  vehicleTodoPartsRelations,
 };
