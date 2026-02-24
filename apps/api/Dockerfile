@@ -40,7 +40,7 @@ FROM node:20-alpine AS production
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/apps/api/dist ./dist
-COPY --from=build /app/packages/db/generated ./packages/db/generated
+COPY --from=build /app/packages/db/dist ./packages/db/dist
 
 ENV NODE_ENV=production
 EXPOSE 3001
