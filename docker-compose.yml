@@ -43,7 +43,7 @@ services:
       OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-}
       OIDC_SCOPE: ${OIDC_SCOPE:-openid profile email}
     ports:
-      - "${API_HOST:-0.0.0.0}:${API_PORT:-3001}:${API_PORT:-3001}"
+      - "${API_PORT:-3001}:3001"
 
   # ─────────────────────────────────────────
   # React Frontend
@@ -55,7 +55,7 @@ services:
     depends_on:
       - api
     ports:
-      - "${WEB_HOST:-0.0.0.0}:${WEB_PORT:-3000}:${WEB_PORT:-3000}"
+      - "${WEB_PORT:-3000}:3000"
 
 volumes:
   postgres_data:
