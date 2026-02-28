@@ -33,7 +33,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      PORT: 3001
+      PORT: ${API_PORT:-3001}
       FRONTEND_URL: ${FRONTEND_URL}
       # OAuth/OIDC Configuration (optional)
       OIDC_ENABLED: ${OIDC_ENABLED:-false}
@@ -43,7 +43,7 @@ services:
       OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-}
       OIDC_SCOPE: ${OIDC_SCOPE:-openid profile email}
     ports:
-      - "3001:3001"
+      - "${API_HOST:-0.0.0.0}:${API_PORT:-3001}:${API_PORT:-3001}"
 
   # ─────────────────────────────────────────
   # React Frontend
@@ -55,7 +55,7 @@ services:
     depends_on:
       - api
     ports:
-      - "3000:3000"
+      - "${WEB_HOST:-0.0.0.0}:${WEB_PORT:-3000}:${WEB_PORT:-3000}"
 
 volumes:
   postgres_data:
