@@ -38,7 +38,17 @@ RUN npm run build --workspace=@pitbook/api
 # ── Production ────────────────────────────
 FROM node:20-alpine AS production
 WORKDIR /app
-COPY --from=build /app/node_modules ./node_modules
+
+# Copy package manifests so npm can set up the workspace
+COPY package.json package-lock.json ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/db/package.json ./packages/db/
+COPY packages/types/package.json ./packages/types/
+
+# Install production dependencies only — ensures correct hoisting and workspace symlinks
+RUN npm ci --omit=dev
+
+# Copy built artifacts
 COPY --from=build /app/apps/api/dist ./dist
 COPY --from=build /app/packages/db/dist ./packages/db/dist
 
