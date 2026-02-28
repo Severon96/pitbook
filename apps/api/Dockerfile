@@ -48,10 +48,10 @@ COPY packages/types/package.json ./packages/types/
 # Install production dependencies only — ensures correct hoisting and workspace symlinks
 RUN npm ci --omit=dev
 
-# Copy built artifacts
-COPY --from=build /app/apps/api/dist ./dist
+# Copy built artifacts in their original locations so module resolution walks the right node_modules
+COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY --from=build /app/packages/db/dist ./packages/db/dist
 
 ENV NODE_ENV=production
 EXPOSE 3001
-CMD ["node", "dist/main"]
+CMD ["node", "apps/api/dist/main"]
