@@ -7,13 +7,15 @@ services:
     container_name: pitbook_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-pitbook}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pitbook_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-pitbook}
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pitbook}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,40 +24,64 @@ services:
   # NestJS Backend API
   # ─────────────────────────────────────────
   api:
-    image: ghcr.io/severon96/pitbook-backend:${VERSION:-latest}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: ${NODE_ENV:-development}
     container_name: pitbook_api
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pitbook}:${POSTGRES_PASSWORD:-pitbook_secret}@postgres:5432/${POSTGRES_DB:-pitbook}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       PORT: 3001
-      FRONTEND_URL: ${FRONTEND_URL}
-      # OAuth/OIDC Configuration (optional)
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      # OAuth/OIDC Configuration
       OIDC_ENABLED: ${OIDC_ENABLED:-false}
-      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-}
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
-      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-}
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI}
       OIDC_SCOPE: ${OIDC_SCOPE:-openid profile email}
+      # Disable Node.js certificate validation for self-signed certs (development only)
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "3001:3001"
+    volumes:
+      # Dev: live reload via bind mount
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/api/node_modules
 
   # ─────────────────────────────────────────
   # React Frontend
   # ─────────────────────────────────────────
   web:
-    image: ghcr.io/severon96/pitbook-frontend:${VERSION:-latest}
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: ${NODE_ENV:-development}
     container_name: pitbook_web
     restart: unless-stopped
     depends_on:
       - api
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
     ports:
       - "3000:3000"
+    volumes:
+      # Dev: live reload via bind mount
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/web/node_modules
 
 volumes:
   postgres_data:
