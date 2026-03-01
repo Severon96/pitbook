@@ -1,39 +1,39 @@
 # ─────────────────────────────────────────
 # Pitbook Web Dockerfile
-# Multi-stage: development + production
+# Next.js standalone build
 # ─────────────────────────────────────────
 
 FROM node:20-alpine AS base
 WORKDIR /app
 
-# ── Development ───────────────────────────
-FROM base AS development
-COPY package.json package-lock.json ./
-COPY apps/web/package.json ./apps/web/
-COPY packages/types/package.json ./packages/types/
-RUN npm ci
-
-COPY . .
-EXPOSE 3000
-WORKDIR /app/apps/web
-CMD ["npm", "run", "dev"]
-
 # ── Build ─────────────────────────────────
-FROM base AS build
+FROM base AS builder
 COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/types/package.json ./packages/types/
 RUN npm ci
 
 COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build --workspace=@pitbook/web
 
-# ── Production (nginx) ────────────────────
-FROM nginx:alpine AS production
-COPY --from=build /app/apps/web/dist /usr/share/nginx/html
-COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY apps/web/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# ── Production (Next.js standalone) ───────
+FROM node:20-alpine AS production
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+
+USER nextjs
 EXPOSE 3000
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+CMD ["node", "apps/web/server.js"]

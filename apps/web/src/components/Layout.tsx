@@ -1,4 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -10,12 +12,12 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const location = useLocation();
+  const pathname = usePathname();
   const { t } = useTranslation();
   const { user, logout } = useAuth();
 
   const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    return pathname === path || pathname.startsWith(path + '/');
   };
 
   return (
@@ -25,16 +27,16 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link
-                to="/"
+                href="/"
                 className="flex items-center px-2 text-xl font-bold text-gray-900 dark:text-white"
               >
                 🏁 Pitbook
               </Link>
               <div className="ml-6 flex space-x-4">
                 <Link
-                  to="/"
+                  href="/"
                   className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                    location.pathname === '/'
+                    pathname === '/'
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                       : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
@@ -42,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
                   {t('nav.dashboard')}
                 </Link>
                 <Link
-                  to="/vehicles"
+                  href="/vehicles"
                   className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                     isActive('/vehicles')
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'

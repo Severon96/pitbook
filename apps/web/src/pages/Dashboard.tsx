@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+'use client';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useVehicles } from '../api/vehicles';
 import Card from '../components/Card';
@@ -78,7 +79,7 @@ export default function Dashboard() {
             {vehicles.slice(0, 5).map((vehicle) => (
               <Link
                 key={vehicle.id}
-                to={`/vehicles/${vehicle.id}`}
+                href={`/vehicles/${vehicle.id}`}
                 className="block p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
               >
                 <div className="flex items-center justify-between">
@@ -110,7 +111,7 @@ export default function Dashboard() {
           <div className="text-center py-8 text-gray-500">
             <p>{t('vehicle.noVehiclesYet')}</p>
             <Link
-              to="/vehicles"
+              href="/vehicles"
               className="mt-2 inline-block text-blue-600 hover:text-blue-700"
             >
               {t('vehicle.addFirstVehicle')}

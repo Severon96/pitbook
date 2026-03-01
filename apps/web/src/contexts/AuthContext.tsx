@@ -1,5 +1,6 @@
+'use client';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { authApi, User, LoginDto, RegisterDto, SetupDto } from '../api/auth';
 
 interface AuthContextType {
@@ -17,7 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Load user from token on mount
   useEffect(() => {
@@ -44,7 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('token', response.access_token);
     localStorage.setItem('user', JSON.stringify(response.user));
     setUser(response.user);
-    navigate('/');
+    router.push('/');
   };
 
   const register = async (dto: RegisterDto) => {
@@ -52,7 +53,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('token', response.access_token);
     localStorage.setItem('user', JSON.stringify(response.user));
     setUser(response.user);
-    navigate('/');
+    router.push('/');
   };
 
   const setupAdmin = async (dto: SetupDto) => {
@@ -60,14 +61,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('token', response.access_token);
     localStorage.setItem('user', JSON.stringify(response.user));
     setUser(response.user);
-    navigate('/');
+    router.push('/');
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    navigate('/login');
+    router.push('/login');
   };
 
   return (
