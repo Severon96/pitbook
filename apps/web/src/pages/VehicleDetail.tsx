@@ -1,5 +1,7 @@
+'use client';
 import { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useVehicle, useVehicleSummary, useDeleteVehicle, useUpdateVehicle } from '../api/vehicles';
 import { useCostEntries } from '../api/costEntries';
@@ -11,8 +13,9 @@ import { translateVehicleType, translateCostCategory, translateSeasonStatus } fr
 
 export default function VehicleDetail() {
   const { t } = useTranslation();
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
+  const router = useRouter();
   const { data: vehicle, isLoading } = useVehicle(id!);
   const { data: summary } = useVehicleSummary(id!);
   const { data: costEntries } = useCostEntries(id!);
@@ -36,7 +39,7 @@ export default function VehicleDetail() {
     }
     try {
       await deleteVehicle.mutateAsync(id!);
-      navigate('/vehicles');
+      router.push('/vehicles');
     } catch (error) {
       console.error('Failed to delete vehicle:', error);
     }
@@ -76,7 +79,7 @@ export default function VehicleDetail() {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900">{t('vehicle.vehicleNotFound')}</h2>
-        <Link to="/vehicles" className="mt-4 inline-block text-blue-600 hover:text-blue-700">
+        <Link href="/vehicles" className="mt-4 inline-block text-blue-600 hover:text-blue-700">
           {t('vehicle.backToVehicles')}
         </Link>
       </div>
@@ -106,7 +109,7 @@ export default function VehicleDetail() {
       <div className="flex items-center justify-between">
         <div>
           <Link
-            to="/vehicles"
+            href="/vehicles"
             className="text-sm text-blue-600 hover:text-blue-700 mb-2 inline-block"
           >
             ← {t('vehicle.backToVehicles')}
@@ -124,13 +127,13 @@ export default function VehicleDetail() {
             📥 {t('cost.exportCosts')}
           </button>
           <Link
-            to={`/vehicles/${id}/todos`}
+            href={`/vehicles/${id}/todos`}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             {t('todo.todos')}
           </Link>
           <Link
-            to={`/vehicles/${id}/costs`}
+            href={`/vehicles/${id}/costs`}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             {t('vehicle.manageCosts')}

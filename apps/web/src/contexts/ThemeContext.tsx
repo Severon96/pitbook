@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
+'use client';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -11,22 +12,16 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    return savedTheme || 'system';
-  });
+  const [theme, setThemeState] = useState<Theme>('system');
+  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
 
-  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    const initialTheme = savedTheme || 'system';
+  // Initialise from localStorage after mount (client-only)
+  useEffect(() => {
+    const savedTheme = (localStorage.getItem('theme') as Theme) || 'system';
+    setThemeState(savedTheme);
+  }, []);
 
-    if (initialTheme === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return initialTheme;
-  });
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     const updateTheme = () => {
       let newEffectiveTheme: 'light' | 'dark';
 

@@ -1,5 +1,7 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -8,7 +10,7 @@ import { authApi } from '../api/auth';
 export const Login: React.FC = () => {
   const { t } = useTranslation();
   const { login, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -22,9 +24,9 @@ export const Login: React.FC = () => {
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated) {
-      navigate('/');
+      router.push('/');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     // Check if setup is needed
@@ -32,7 +34,7 @@ export const Login: React.FC = () => {
       try {
         const { setupComplete } = await authApi.getSetupStatus();
         if (!setupComplete) {
-          navigate('/setup');
+          router.push('/setup');
         }
 
         // Check OAuth configuration
@@ -46,7 +48,7 @@ export const Login: React.FC = () => {
     };
 
     checkSetup();
-  }, [navigate]);
+  }, [router]);
 
   useEffect(() => {
     // Handle OAuth callback
@@ -189,7 +191,7 @@ export const Login: React.FC = () => {
 
             <div className="mt-6">
               <Link
-                to="/register"
+                href="/register"
                 className="w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 {t('auth.register')}

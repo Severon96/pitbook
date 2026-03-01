@@ -1,5 +1,6 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -8,7 +9,7 @@ import { authApi } from '../api/auth';
 export const Setup: React.FC = () => {
   const { t } = useTranslation();
   const { setupAdmin } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -25,7 +26,7 @@ export const Setup: React.FC = () => {
       try {
         const { setupComplete } = await authApi.getSetupStatus();
         if (setupComplete) {
-          navigate('/login');
+          router.push('/login');
         }
       } catch (error) {
         console.error('Error checking setup status:', error);
@@ -33,7 +34,7 @@ export const Setup: React.FC = () => {
     };
 
     checkSetup();
-  }, [navigate]);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
