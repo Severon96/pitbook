@@ -1,8 +1,11 @@
 #!/bin/sh
 set -e
 
-# Inject runtime config so VITE_API_URL can be set per-deployment without rebuilding.
-printf 'window.__RUNTIME_CONFIG__ = { "API_URL": "%s" };\n' "$RUNTIME_API_URL" \
-      > /usr/share/nginx/html/config.js
+# Replace the API URL placeholder baked in at build time with the runtime value.
+# RUNTIME_API_URL is set via docker-compose environment from the VITE_API_URL stack variable.
+if [ -n "$RUNTIME_API_URL" ]; then
+  find /usr/share/nginx/html/assets -name "*.js" \
+    -exec sed -i "s|PITBOOK_API_URL_PLACEHOLDER|$RUNTIME_API_URL|g" {} \;
+fi
 
 exec "$@"

@@ -1,15 +1,9 @@
 import axios from 'axios';
 
-declare global {
-  interface Window {
-    __RUNTIME_CONFIG__?: { API_URL?: string };
-  }
-}
-
-const API_URL =
-  window.__RUNTIME_CONFIG__?.API_URL ||
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3001';
+// In production the placeholder is replaced at container startup via entrypoint.sh.
+// If replacement didn't happen (e.g. RUNTIME_API_URL not set), fall back to localhost.
+const baked = import.meta.env.VITE_API_URL || '';
+const API_URL = baked.startsWith('http') ? baked : 'http://localhost:3001';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
