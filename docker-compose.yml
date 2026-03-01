@@ -22,7 +22,7 @@ services:
   # NestJS Backend API
   # ─────────────────────────────────────────
   api:
-    image: ghcr.io/severon96/pitbook-backend:${VERSION:-latest}
+    image: pitbook-api:latest
     container_name: pitbook_api
     restart: unless-stopped
     depends_on:
@@ -33,7 +33,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      PORT: ${API_PORT:-3001}
+      PORT: 3001
       FRONTEND_URL: ${FRONTEND_URL}
       # OAuth/OIDC Configuration (optional)
       OIDC_ENABLED: ${OIDC_ENABLED:-false}
@@ -49,11 +49,13 @@ services:
   # React Frontend
   # ─────────────────────────────────────────
   web:
-    image: ghcr.io/severon96/pitbook-frontend:${VERSION:-latest}
+    image: pitbook-web:latest
     container_name: pitbook_web
     restart: unless-stopped
     depends_on:
       - api
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
     ports:
       - "${WEB_PORT:-3000}:3000"
 

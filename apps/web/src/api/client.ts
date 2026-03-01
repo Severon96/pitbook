@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+declare global {
+  interface Window {
+    __RUNTIME_CONFIG__?: { API_URL?: string };
+  }
+}
+
+const API_URL =
+  window.__RUNTIME_CONFIG__?.API_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:3001';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
