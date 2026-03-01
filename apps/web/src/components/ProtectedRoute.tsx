@@ -1,5 +1,6 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api/auth';
 
@@ -9,6 +10,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
   const [checkingSetup, setCheckingSetup] = useState(true);
   const [setupComplete, setSetupComplete] = useState(true);
 
@@ -19,7 +21,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         setSetupComplete(setupComplete);
       } catch (error) {
         console.error('Error checking setup status:', error);
-        setSetupComplete(true); // Assume setup is complete on error
+        setSetupComplete(true);
       } finally {
         setCheckingSetup(false);
       }
@@ -31,6 +33,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       setCheckingSetup(false);
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isLoading && !checkingSetup && !isAuthenticated) {
+      if (!setupComplete) {
+        router.replace('/setup');
+      } else {
+        router.replace('/login');
+      }
+    }
+  }, [isLoading, checkingSetup, isAuthenticated, setupComplete, router]);
 
   if (isLoading || checkingSetup) {
     return (
@@ -44,12 +56,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    // If setup is not complete, redirect to setup page
-    if (!setupComplete) {
-      return <Navigate to="/setup" replace />;
-    }
-    // Otherwise, redirect to login
-    return <Navigate to="/login" replace />;
+    return null;
   }
 
   return <>{children}</>;

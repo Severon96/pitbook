@@ -1,3 +1,4 @@
+'use client';
 import { useState, useRef, useEffect } from 'react';
 import { CAR_BRANDS } from '../config/carBrands';
 import BrandLogo from './BrandLogo';

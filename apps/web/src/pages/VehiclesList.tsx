@@ -1,5 +1,6 @@
+'use client';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useVehicles, useCreateVehicle } from '../api/vehicles';
 import Card from '../components/Card';
@@ -182,7 +183,7 @@ export default function VehiclesList() {
         {vehicles?.map((vehicle) => (
           <Link
             key={vehicle.id}
-            to={`/vehicles/${vehicle.id}`}
+            href={`/vehicles/${vehicle.id}`}
             className="block"
           >
             <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">

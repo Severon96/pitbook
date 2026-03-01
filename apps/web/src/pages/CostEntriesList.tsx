@@ -1,5 +1,7 @@
+'use client';
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useVehicle } from '../api/vehicles';
 import { useCostEntries, useCreateCostEntry, useDeleteCostEntry, CostCategory } from '../api/costEntries';
@@ -11,7 +13,8 @@ const CATEGORIES: CostCategory[] = ['FUEL', 'SERVICE', 'REPAIR', 'INSURANCE', 'T
 
 export default function CostEntriesList() {
   const { t } = useTranslation();
-  const { vehicleId } = useParams<{ vehicleId: string }>();
+  const params = useParams<{ id: string }>();
+  const vehicleId = params?.id;
   const { data: vehicle } = useVehicle(vehicleId!);
   const { data: costEntries, isLoading } = useCostEntries(vehicleId!);
   const createCostEntry = useCreateCostEntry();
@@ -106,7 +109,7 @@ export default function CostEntriesList() {
       <div className="flex items-center justify-between">
         <div>
           <Link
-            to={`/vehicles/${vehicleId}`}
+            href={`/vehicles/${vehicleId}`}
             className="text-sm text-blue-600 hover:text-blue-700 mb-2 inline-block"
           >
             ← {t('cost.backToVehicle')}
