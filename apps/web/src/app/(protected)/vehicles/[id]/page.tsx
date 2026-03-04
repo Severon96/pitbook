@@ -1,2 +1,2 @@
-import VehicleDetail from '../../../../pages/VehicleDetail';
+import VehicleDetail from '../../../../views/VehicleDetail';
 export default VehicleDetail;
