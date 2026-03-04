@@ -1,2 +1,2 @@
-import { Setup } from '../../pages/Setup';
+import { Setup } from '../../views/Setup';
 export default Setup;
