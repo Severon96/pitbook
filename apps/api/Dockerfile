@@ -51,6 +51,7 @@ RUN npm ci --omit=dev
 # Copy built artifacts in their original locations so module resolution walks the right node_modules
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY --from=build /app/packages/db/dist ./packages/db/dist
+COPY --from=build /app/packages/db/drizzle ./packages/db/drizzle
 
 ENV NODE_ENV=production
 EXPOSE 3001
