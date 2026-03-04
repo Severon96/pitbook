@@ -1,2 +1,2 @@
-import CostEntriesList from '../../../../../pages/CostEntriesList';
+import CostEntriesList from '../../../../../views/CostEntriesList';
 export default CostEntriesList;

@@ -57,7 +57,7 @@ services:
     depends_on:
       - api
     environment:
-      API_URL: ${VITE_API_URL:-http://localhost:3001}
+      API_URL: ${API_URL:-http://localhost:3001}
     ports:
       - "${WEB_PORT:-3000}:3000"
 

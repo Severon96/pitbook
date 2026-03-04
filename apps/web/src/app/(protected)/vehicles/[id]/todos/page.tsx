@@ -1,2 +1,2 @@
-import TodoList from '../../../../../pages/TodoList';
+import TodoList from '../../../../../views/TodoList';
 export default TodoList;
