@@ -19,12 +19,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - pitbook
 
   # ─────────────────────────────────────────
   # NestJS Backend API
   # ─────────────────────────────────────────
   api:
-    image: pitbook-api:latest
+    image: ghcr.io/severon96/pitbook-backend:${VERSION:-latest}
     container_name: pitbook_api
     restart: unless-stopped
     depends_on:
@@ -35,7 +37,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      PORT: 3001
+      PORT: ${API_INTERNAL_PORT:-3001}
       FRONTEND_URL: ${FRONTEND_URL}
       # OAuth/OIDC Configuration (optional)
       OIDC_ENABLED: ${OIDC_ENABLED:-false}
@@ -45,21 +47,29 @@ services:
       OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-}
       OIDC_SCOPE: ${OIDC_SCOPE:-openid profile email}
     ports:
-      - "${API_PORT:-3001}:3001"
+      - "${API_PORT:-3001}:${API_INTERNAL_PORT:-3001}"
+    networks:
+      - pitbook
 
   # ─────────────────────────────────────────
-  # React Frontend
+  # Next.js Frontend
   # ─────────────────────────────────────────
   web:
-    image: pitbook-web:latest
+    image: ghcr.io/severon96/pitbook-frontend:${VERSION:-latest}
     container_name: pitbook_web
     restart: unless-stopped
     depends_on:
       - api
     environment:
-      API_URL: ${API_URL:-http://localhost:3001}
+      API_URL: ${API_URL:-http://api:3001}
     ports:
       - "${WEB_PORT:-3000}:3000"
+    networks:
+      - pitbook
+
+networks:
+  pitbook:
+    driver: bridge
 
 volumes:
   postgres_data:
