@@ -11,7 +11,7 @@
   "dependencies": {
     "@pitbook/types": "*",
     "@tanstack/react-query": "^5.17.19",
-    "axios": "^1.6.7",
+    "axios": "^1.17.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.1",
     "i18next": "^25.8.13",
